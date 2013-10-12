@@ -38,11 +38,16 @@
 
 package com.multiplemonomials.printerdroid;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 
-import com.multiplemonomials.printerdroid.R;
 import com.multiplemonomials.androidutils.LineReader;
+import com.multiplemonomials.androidutils.progressbox.ProgressBoxManager;
+import com.multiplemonomials.printerdroid.R;
 import com.multiplemonomials.printerdroid.PrinterService.MyLocalBinder;
 import com.multiplemonomials.printerdroid.gcodeparser.Layer;
 import com.multiplemonomials.printerdroid.gcodeparser.ParserAsyncTask;
@@ -59,6 +64,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -70,6 +76,7 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements ConsoleListener {
 	private static final String TAG = "Printerdroid";
+	private static final int FILE_REQUEST_CODE = 0;
 	public static Context appContext;
 	
 	ConsoleFragment consoleFragment;
@@ -213,55 +220,59 @@ public class MainActivity extends Activity implements ConsoleListener {
 		
 	}
 	
-	//called by ParserAsyncTask
-	ProgressDialog progressDialog;
-	public void showLayerProgressBar()
-	{
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setTitle("Parsing File...");
-		progressDialog.setMessage("Parsing Layer 1...");
-		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		progressDialog.show();
-		
-	}
-	
-	public void updateLayerProgressBar(int progress)
-	{
-		if(progressDialog != null)
-		{
-			progressDialog.setMessage("Parsing Layer " + progress + "...");
-		}
-		
-	}
-	
-	public void closeLayerProgressBar()
-	{
-		if(progressDialog != null)
-		{
-			progressDialog.dismiss();
-		}
-		
-	}
 	
 	public void onClickLoadFile(View view)
 	{
-		LineReader lineReader = new LineReader(getResources().openRawResource(R.raw.test2));
-		ParserAsyncTask parserAsyncTask = new ParserAsyncTask(this);
-		parserAsyncTask.execute(lineReader);
+		//get a file from a file browser
+		 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		    intent.setType("file/*");
+		    startActivityForResult(intent, FILE_REQUEST_CODE);
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode == FILE_REQUEST_CODE)
+		{
+			//get the file that was returned
+			Uri fileUri = data.getData();
+			File file = new File(fileUri.getPath());
+			Log.v(TAG, "Loaded file " + file.getPath());
+			Log.v(TAG, "File exists: " + file.exists());
+			
+			//read its data
+			Settings.currentFile = loadFile(file);
+			Log.i(TAG, "current file has " + Settings.currentFile.size() + " layers");
+		}
+	}
+
+	public LinkedList<Layer> loadFile(File file) 
+	{
 		try 
 		{
+			//setup file stream
+			InputStream inputStream = new FileInputStream(file);
+			LineReader lineReader = new LineReader(inputStream);
+			
+			//run parser
+			ParserAsyncTask parserAsyncTask = new ParserAsyncTask(new ProgressBoxManager(this));
+			parserAsyncTask.execute(lineReader);
 			LinkedList<Layer> codes = (LinkedList<Layer>)parserAsyncTask.get();
+			return codes;
+		}
+		catch (FileNotFoundException e) 
+		{
+			e.printStackTrace();
 		}
 		catch (InterruptedException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		catch (ExecutionException e)
+		} 
+		catch (ExecutionException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	    

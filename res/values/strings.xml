@@ -18,4 +18,5 @@
     <string name="clear">Clear</string>
     <string name="retry">Retry</string>
     <string name="loadfile">Load File</string>
+    <string name="print">Print</string>
 </resources>

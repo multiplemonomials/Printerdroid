@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.multiplemonomials.androidutils.LineReader;
+import com.multiplemonomials.androidutils.progressbox.*;
 import com.multiplemonomials.printerdroid.MainActivity;
 
 import android.os.AsyncTask;
@@ -15,14 +16,16 @@ import android.util.Log;
  * @author Jamie
  *
  */
-public class ParserAsyncTask extends AsyncTask<LineReader, Integer, List<Layer>> {
+public class ParserAsyncTask extends AsyncTask<LineReader, Integer, List<Layer>> 
+{
 
-	 private static final String TAG = "ParserAsyncTask";
-	private MainActivity _mainActivity;
+	private static final String TAG = "ParserAsyncTask";
+	private ProgressBoxManager _progressBoxManager;
 
-	 public ParserAsyncTask(MainActivity mainActivity) {
-	        _mainActivity = mainActivity;
-	 } 
+	public ParserAsyncTask(ProgressBoxManager progressBoxManager) 
+	{
+		_progressBoxManager = progressBoxManager;
+	} 
 	
 	@Override
 	protected List<Layer> doInBackground(LineReader... params) {
@@ -32,7 +35,7 @@ public class ParserAsyncTask extends AsyncTask<LineReader, Integer, List<Layer>>
 	@Override
 	protected void onPreExecute()
 	{
-		_mainActivity.showLayerProgressBar();
+		_progressBoxManager.showLayerProgressBar("Parsing File...", "Parsing Layer 1...");
 	}
 	
 	List<Layer> readFromFile(LineReader lineReader)
@@ -90,13 +93,13 @@ public class ParserAsyncTask extends AsyncTask<LineReader, Integer, List<Layer>>
 	
 	void onProgressUpdate(int progress)
 	{
-		_mainActivity.updateLayerProgressBar(progress);
+		_progressBoxManager.updateLayerProgressBar(progress);
 	}
 	
 	@Override
 	protected void onPostExecute(List<Layer> result)
 	{
-		_mainActivity.closeLayerProgressBar();
+		_progressBoxManager.closeLayerProgressBar();
 	}
 
 }

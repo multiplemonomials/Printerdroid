@@ -38,13 +38,14 @@ public final class R {
         public static final int console=0x7f0a0006;
         public static final int consoleInput=0x7f0a0002;
         public static final int fragment_container=0x7f0a0000;
+        public static final int gcodeView1=0x7f0a0008;
         public static final int loadfilebutton=0x7f0a0007;
-        public static final int menuitem_about=0x7f0a000c;
-        public static final int menuitem_add=0x7f0a0009;
-        public static final int menuitem_feedback=0x7f0a000b;
-        public static final int menuitem_quit=0x7f0a000d;
-        public static final int menuitem_search=0x7f0a0008;
-        public static final int menuitem_share=0x7f0a000a;
+        public static final int menuitem_about=0x7f0a000d;
+        public static final int menuitem_add=0x7f0a000a;
+        public static final int menuitem_feedback=0x7f0a000c;
+        public static final int menuitem_quit=0x7f0a000e;
+        public static final int menuitem_search=0x7f0a0009;
+        public static final int menuitem_share=0x7f0a000b;
         public static final int textView2=0x7f0a0001;
     }
     public static final class layout {
@@ -78,6 +79,7 @@ public final class R {
          */
         public static final int menu_search=0x7f070004;
         public static final int menu_share=0x7f070009;
+        public static final int print=0x7f070010;
         public static final int retry=0x7f07000e;
         public static final int send=0x7f07000a;
         public static final int start=0x7f07000b;
