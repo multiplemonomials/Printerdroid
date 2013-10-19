@@ -1,12 +1,11 @@
 package com.multiplemonomials.printerdroid.gcodeparser;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.multiplemonomials.androidutils.LineReader;
 import com.multiplemonomials.androidutils.progressbox.*;
-import com.multiplemonomials.printerdroid.MainActivity;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -40,15 +39,16 @@ public class ParserAsyncTask extends AsyncTask<LineReader, Integer, List<Layer>>
 	
 	List<Layer> readFromFile(LineReader lineReader)
 	{
-		List<Layer> output = new LinkedList<Layer>();
+		List<Layer> output = new ArrayList<Layer>();
 		Layer layer;
-		int progress = 1;
+		int progress = 0;
 		do
 		{
 			layer = readLayer(lineReader);
 			Log.i(TAG, "Layer " + progress);
 			progress++;
 			publishProgress(progress);
+			output.add(layer);
 		}
 		while(layer.isLast == false);
 		return output;

@@ -78,9 +78,9 @@ public class LineChartView extends ChartView {
 
             for (PointOnChart pointOnChart : points) {
 
-                System.out.println("(x_translate_factor, x_unit_length)"+"("+x_translate_factor+","+x_unit_length+")");
-                System.out.println("(y_translate_factor, y_unit_length)"+"("+y_translate_factor+","+y_unit_length+")");
-                System.out.println("Before : (x, y)"+"("+pointOnChart.x+","+pointOnChart.y+")");
+                //System.out.println("(x_translate_factor, x_unit_length)"+"("+x_translate_factor+","+x_unit_length+")");
+                //System.out.println("(y_translate_factor, y_unit_length)"+"("+y_translate_factor+","+y_unit_length+")");
+                //System.out.println("Before : (x, y)"+"("+pointOnChart.x+","+pointOnChart.y+")");
 
                 pointOnChart.x = x_translate_factor + ((float)(pointOnChart.x) * x_unit_length);
                 pointOnChart.y = y_translate_factor - ((float)(pointOnChart.y) * y_unit_length);

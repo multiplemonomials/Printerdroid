@@ -42,7 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import com.multiplemonomials.androidutils.LineReader;
@@ -56,7 +56,6 @@ import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ProgressDialog;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -246,7 +245,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 		}
 	}
 
-	public LinkedList<Layer> loadFile(File file) 
+	public List<Layer> loadFile(File file) 
 	{
 		try 
 		{
@@ -257,7 +256,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 			//run parser
 			ParserAsyncTask parserAsyncTask = new ParserAsyncTask(new ProgressBoxManager(this));
 			parserAsyncTask.execute(lineReader);
-			LinkedList<Layer> codes = (LinkedList<Layer>)parserAsyncTask.get();
+			List<Layer> codes = (List<Layer>)parserAsyncTask.get();
 			return codes;
 		}
 		catch (FileNotFoundException e) 

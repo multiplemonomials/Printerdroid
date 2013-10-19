@@ -1,7 +1,5 @@
 package com.multiplemonomials.printerdroid.view;
 
-import java.util.List;
-
 import com.multiplemonomials.printerdroid.Settings;
 import com.multiplemonomials.printerdroid.gcodeparser.G1;
 import com.multiplemonomials.printerdroid.gcodeparser.Gcode;
