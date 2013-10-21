@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import com.multiplemonomials.androidutils.LineReader;
+import com.multiplemonomials.androidutils.preferencesmanager.PreferencesActivity;
+import com.multiplemonomials.androidutils.progressbox.ErrorDialog;
 import com.multiplemonomials.androidutils.progressbox.ProgressBoxManager;
 import com.multiplemonomials.printerdroid.R;
 import com.multiplemonomials.printerdroid.PrinterService.MyLocalBinder;
@@ -76,6 +78,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements ConsoleListener {
 	private static final String TAG = "Printerdroid";
 	private static final int FILE_REQUEST_CODE = 0;
+	private static final int PREFERENCES_ACTIVITY_REQUEST_CODE = 1;
 	public static Context appContext;
 	
 	ConsoleFragment consoleFragment;
@@ -172,8 +175,9 @@ public class MainActivity extends Activity implements ConsoleListener {
 			case R.id.menuitem_add:
 				Toast.makeText(appContext, "add", Toast.LENGTH_SHORT).show();
 				return true;
-			case R.id.menuitem_share:
-				Toast.makeText(appContext, "share", Toast.LENGTH_SHORT).show();
+			case R.id.menuitem_preferences:
+				startActivityForResult(new Intent(this, PreferencesActivity.class), PREFERENCES_ACTIVITY_REQUEST_CODE);
+				Settings.regenerate(this);
 				return true;
 			case R.id.menuitem_feedback:
 				Toast.makeText(appContext, "feedback", Toast.LENGTH_SHORT).show();
@@ -210,7 +214,15 @@ public class MainActivity extends Activity implements ConsoleListener {
 	
 	public void doSend(View view)
 	{
-		myService.doSend(consoleFragment.editText.getText().toString());
+		//if a driver is not connected, show an error dialog.
+		if(myService.driver != null)
+		{
+			myService.doSend(consoleFragment.editText.getText().toString());
+		}
+		else
+		{
+			ErrorDialog.showErrorDialog(this, R.string.app_name, "No device connected.");
+		}
 	}
 
 	@Override
@@ -234,14 +246,23 @@ public class MainActivity extends Activity implements ConsoleListener {
 		if(requestCode == FILE_REQUEST_CODE)
 		{
 			//get the file that was returned
-			Uri fileUri = data.getData();
-			File file = new File(fileUri.getPath());
-			Log.v(TAG, "Loaded file " + file.getPath());
-			Log.v(TAG, "File exists: " + file.exists());
-			
-			//read its data
-			Settings.currentFile = loadFile(file);
-			Log.i(TAG, "current file has " + Settings.currentFile.size() + " layers");
+			//check if the user pressed cancel
+			if(data != null)
+			{
+				Uri fileUri = data.getData();
+				File file = new File(fileUri.getPath());
+				Log.v(TAG, "Loaded file " + file.getPath());
+				Log.v(TAG, "File exists: " + file.exists());
+				
+				//read its data
+				Settings.currentFile = loadFile(file);
+				Log.i(TAG, "current file has " + Settings.currentFile.size() + " layers");
+			}
+
+		}
+		else if(requestCode == PREFERENCES_ACTIVITY_REQUEST_CODE)
+		{
+			Settings.regenerate(this);
 		}
 	}
 

@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="11"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
 
     <application
         android:allowBackup="true"
@@ -29,9 +29,7 @@
             </intent-filter>
         </activity>
         <service android:name="PrinterService"></service>
-        <activity android:name="ConsoleActivity"></activity>
-        <activity android:name="ViewActivity"></activity>
-        <activity android:name="OverviewActivity"></activity>
+        <activity android:name="com.multiplemonomials.androidutils.preferencesmanager.PreferencesActivity" android:theme="@android:style/Theme.Holo" android:label="@string/preferences"></activity>
     </application>
 
 </manifest>

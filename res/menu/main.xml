@@ -10,11 +10,10 @@
         android:icon="@android:drawable/ic_menu_add" 
         android:showAsAction="ifRoom">
     </item>
-    <item android:id="@+id/menuitem_share"
-        android:title="@string/menu_share"
-        android:icon="@android:drawable/ic_menu_share" 
-        android:showAsAction="ifRoom"
-        android:actionProviderClass="android.widget.ShareActionProvider">
+    <item android:id="@+id/menuitem_preferences"
+        android:title="@string/menu_preferences"
+        android:icon="@android:drawable/ic_menu_preferences" 
+        android:showAsAction="ifRoom" >
     </item>
     <item android:id="@+id/menuitem_feedback"
         android:title="@string/menu_feedback"

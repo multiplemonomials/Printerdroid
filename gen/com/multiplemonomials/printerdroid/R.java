@@ -42,9 +42,9 @@ public final class R {
         public static final int menuitem_about=0x7f0a000d;
         public static final int menuitem_add=0x7f0a000a;
         public static final int menuitem_feedback=0x7f0a000c;
+        public static final int menuitem_preferences=0x7f0a000b;
         public static final int menuitem_quit=0x7f0a000e;
         public static final int menuitem_search=0x7f0a0009;
-        public static final int menuitem_share=0x7f0a000b;
         public static final int textView1=0x7f0a0008;
         public static final int textView2=0x7f0a0001;
     }
@@ -73,13 +73,14 @@ public final class R {
         public static final int menu_about=0x7f070008;
         public static final int menu_add=0x7f070005;
         public static final int menu_feedback=0x7f070007;
+        public static final int menu_preferences=0x7f070009;
         public static final int menu_quit=0x7f070006;
         /**  Tab Strings 
  Menu Strings 
          */
         public static final int menu_search=0x7f070004;
-        public static final int menu_share=0x7f070009;
         public static final int nofileloaded=0x7f070011;
+        public static final int preferences=0x7f070012;
         public static final int print=0x7f070010;
         public static final int retry=0x7f07000e;
         public static final int send=0x7f07000a;
@@ -138,5 +139,6 @@ public final class R {
     }
     public static final class xml {
         public static final int device_filter=0x7f040000;
+        public static final int preferences=0x7f040001;
     }
 }

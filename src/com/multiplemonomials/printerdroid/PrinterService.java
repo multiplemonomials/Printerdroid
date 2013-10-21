@@ -206,12 +206,15 @@ public class PrinterService extends Service {
     public void doSend(String string)
     {
 
-        	try {
+        	try 
+        	{
         		byte[] bytes = (string + "\n").getBytes();
         		Log.i(TAG, "Sending bytes: " + bytesToHex(bytes));
         		Log.i(TAG, "Dump: " + HexDump.dumpHexString(bytes));
 				driver.write(bytes, 1000);
-			} catch (IOException e) {
+			} 
+        	catch (IOException e) 
+        	{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

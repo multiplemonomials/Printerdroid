@@ -14,9 +14,9 @@ int id loadfilebutton 0x7f0a0007
 int id menuitem_about 0x7f0a000d
 int id menuitem_add 0x7f0a000a
 int id menuitem_feedback 0x7f0a000c
+int id menuitem_preferences 0x7f0a000b
 int id menuitem_quit 0x7f0a000e
 int id menuitem_search 0x7f0a0009
-int id menuitem_share 0x7f0a000b
 int id textView1 0x7f0a0008
 int id textView2 0x7f0a0001
 int layout activity_main 0x7f030000
@@ -37,10 +37,11 @@ int string loadfile 0x7f07000f
 int string menu_about 0x7f070008
 int string menu_add 0x7f070005
 int string menu_feedback 0x7f070007
+int string menu_preferences 0x7f070009
 int string menu_quit 0x7f070006
 int string menu_search 0x7f070004
-int string menu_share 0x7f070009
 int string nofileloaded 0x7f070011
+int string preferences 0x7f070012
 int string print 0x7f070010
 int string retry 0x7f07000e
 int string send 0x7f07000a
@@ -49,3 +50,4 @@ int string stop 0x7f07000c
 int style AppBaseTheme 0x7f080000
 int style AppTheme 0x7f080001
 int xml device_filter 0x7f040000
+int xml preferences 0x7f040001

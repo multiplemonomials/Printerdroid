@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+   
+    <PreferenceCategory android:title="Printer" android:key="prefs_printer">
+         <EditTextPreference android:negativeButtonText="@android:string/cancel" android:dialogTitle="Bed Width" android:positiveButtonText="@android:string/ok" android:title="Bed Width" android:key="pref_bed_width" android:defaultValue="200" android:numeric="integer"/>
+    <EditTextPreference android:negativeButtonText="@android:string/cancel" android:dialogTitle="Bed Height" android:positiveButtonText="@android:string/ok" android:title="Bed Height" android:key="pref_bed_height" android:defaultValue="200" android:numeric="integer"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
