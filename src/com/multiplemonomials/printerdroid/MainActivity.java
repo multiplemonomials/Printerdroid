@@ -177,7 +177,6 @@ public class MainActivity extends Activity implements ConsoleListener {
 				return true;
 			case R.id.menuitem_preferences:
 				startActivityForResult(new Intent(this, PreferencesActivity.class), PREFERENCES_ACTIVITY_REQUEST_CODE);
-				Settings.regenerate(this);
 				return true;
 			case R.id.menuitem_feedback:
 				Toast.makeText(appContext, "feedback", Toast.LENGTH_SHORT).show();
