@@ -23,8 +23,8 @@ public class Settings {
 		
 		try
 		{
-		bedWidth = Integer.parseInt(sharedPreferences.getString("pref_bed_width", ""));
-		bedHeight = Integer.parseInt(sharedPreferences.getString("pref_bed_height", ""));
+			bedWidth = Integer.parseInt(sharedPreferences.getString("pref_bed_width", ""));
+			bedHeight = Integer.parseInt(sharedPreferences.getString("pref_bed_height", ""));
 		}
 		catch(Exception e)
 		{

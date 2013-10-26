@@ -5,5 +5,8 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="src" path="/Rajawali"/>
+	<classpathentry kind="lib" path="libs/usb-serial-for-android-v010.jar"/>
+	<classpathentry kind="lib" path="libs/jpct_ae.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
