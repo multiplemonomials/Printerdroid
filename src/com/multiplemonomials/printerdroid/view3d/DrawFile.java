@@ -21,7 +21,7 @@ public class DrawFile
 	public static Object3D drawFile()
 	{
 		
-		Object3D lines = Primitives.getCube(5.0F);
+		Object3D lines = Primitives.getCube(2.0F);
 		
 		// note: you will need to define a texture ahead of time.  For a solid-color line, you could use something like:
 		TextureManager.getInstance().addTexture( "GviewLine", new Texture( 8, 8, Color.RED ) );

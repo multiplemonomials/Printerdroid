@@ -11,9 +11,13 @@ import com.multiplemonomials.printerdroid.gcodeparser.Layer;
 
 public class Settings {
 	
+	//to add a preference, first add it as a class variable and then put its setter in regenerate
+	
 	public static int bedHeight = 200;
 	
 	public static int bedWidth = 200;
+	
+	public static int baudrate = 9600;
 	
 	public static List<Layer> currentFile;
 
@@ -25,6 +29,7 @@ public class Settings {
 		{
 			bedWidth = Integer.parseInt(sharedPreferences.getString("pref_bed_width", ""));
 			bedHeight = Integer.parseInt(sharedPreferences.getString("pref_bed_height", ""));
+			baudrate = Integer.parseInt(sharedPreferences.getString("pref_baudrate", ""));
 		}
 		catch(Exception e)
 		{

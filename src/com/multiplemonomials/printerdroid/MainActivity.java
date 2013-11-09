@@ -85,6 +85,8 @@ public class MainActivity extends Activity implements ConsoleListener {
 	
 	PrinterService myService;
 	
+	Thread temperatureChecker; 
+	
 	protected ServiceConnection myConnection = new ServiceConnection() {
 
 	    public void onServiceConnected(ComponentName className,
@@ -107,6 +109,8 @@ public class MainActivity extends Activity implements ConsoleListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         appContext = getApplicationContext();
+        //Set up settings database
+        Settings.regenerate(this);
         
         //start service
         Intent intent = new Intent(this, PrinterService.class);
@@ -135,17 +139,98 @@ public class MainActivity extends Activity implements ConsoleListener {
         actionbar.addTab(ConsoleTab);
         actionbar.addTab(ViewTab);
         actionbar.addTab(OverviewTab);
-        if(!isMyServiceRunning())
-        {
-        	intent = new Intent(this, PrinterService.class);
-        	stopService(intent);
-        	startService(intent);
-        	Log.i(TAG, "Printer Service Started");
-        }
-        else
+        if(isMyServiceRunning())
         {
         	Log.i(TAG, "Printer Service Running");
         }
+        else
+        {
+        	Log.e(TAG, "Printer Service Not Started");
+        }
+    
+    }
+    
+    @Override
+    public void onResume()
+    {
+    	super.onResume();
+    	
+    	temperatureChecker = new Thread()
+    	{
+    		@Override
+    		public void run()
+    		{
+    			String TAG = "PrinterdroidTempThread";
+    			
+    			Log.i(TAG, "Starting...");
+    			
+    			//loop until we're told to stop.
+    			while(!Thread.interrupted())
+    			{
+    				assert(MainActivity.this.myService != null);
+    				
+    				if(myService != null && myService.driver != null)
+    				{
+    					myService.setWaitingForResponce();
+    					//M105 tells the printer to print back its temperatures
+    					MainActivity.this.myService.doSend("M105");
+    				}
+    				//wait a while
+    				try 
+    				{
+    					sleep(2000);
+    				} catch (InterruptedException e) 
+    				{
+    					return;
+    				}
+    				
+    				if(myService != null && myService.driver != null)
+    				{
+    					if(myService.responce != null && myService.responce.endsWith("\n"))
+    					{
+    						
+    						int heaterTempIndex = MainActivity.this.myService.responce.indexOf("T:") + 2;
+    						
+    						try
+    						{
+    							String intermediaryHeaterTemp = MainActivity.this.myService.responce.substring(heaterTempIndex);
+    							//sometimes it seems like the second half of the temp command responce command gets cut off
+    							//which is fine. because that's what we were trying to do anyway
+    							int bedTempIndex = intermediaryHeaterTemp.indexOf("B");
+    							String heaterTempString;
+    							if(bedTempIndex != -1)
+    							{
+    								heaterTempString = intermediaryHeaterTemp.substring(0, bedTempIndex - 1);
+    							}
+    							else
+    							{
+    								heaterTempString = intermediaryHeaterTemp;
+    							}
+
+    							int heaterTemp = Integer.parseInt(heaterTempString);
+    							Log.i(TAG, "heaterTemp: " + heaterTemp);	
+    						}
+    						catch(NumberFormatException error)
+    						{
+    							Log.e("PrinterdroidTemperatureThread", "Failed to parse temperature: " + MainActivity.this.myService.responce);
+    						}
+    					
+    					}
+    				}
+    			}
+    			
+    			Log.i(TAG, "Shutting down...");
+    		}
+    	};
+        temperatureChecker.start();
+   
+    }
+    @Override
+    public void onPause()
+    {
+    	super.onPause();
+    	//signal the temperature checking thread to shutdown.
+    	temperatureChecker.interrupt();
     }
     
     @Override
@@ -169,23 +254,8 @@ public class MainActivity extends Activity implements ConsoleListener {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
-			case R.id.menuitem_search:
-				Toast.makeText(appContext, "search", Toast.LENGTH_SHORT).show();
-				return true;
-			case R.id.menuitem_add:
-				Toast.makeText(appContext, "add", Toast.LENGTH_SHORT).show();
-				return true;
 			case R.id.menuitem_preferences:
 				startActivityForResult(new Intent(this, PreferencesActivity.class), PREFERENCES_ACTIVITY_REQUEST_CODE);
-				return true;
-			case R.id.menuitem_feedback:
-				Toast.makeText(appContext, "feedback", Toast.LENGTH_SHORT).show();
-				return true;
-			case R.id.menuitem_about:
-				Toast.makeText(appContext, "about", Toast.LENGTH_SHORT).show();
-				return true;
-			case R.id.menuitem_quit:
-				Toast.makeText(appContext, "quit", Toast.LENGTH_SHORT).show();
 				return true;
 		}
 		return false;

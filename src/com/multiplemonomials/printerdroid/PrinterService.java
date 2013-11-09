@@ -17,7 +17,6 @@ import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.View;
 
 /**
  * Service for handling serial communications with the printer.
@@ -36,12 +35,6 @@ public class PrinterService extends Service {
 		return myBinder;
 	}
 	
-	@Override
-	public void onCreate()
-	{
-		super.onCreate();
-	}
-	
 	private static final String TAG = "Printerdroid";
 	
 	String currentConsole;
@@ -52,6 +45,29 @@ public class PrinterService extends Service {
 	
 	private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 	
+    private boolean waiting_for_responce;
+    
+    public String responce;
+    
+    /**
+     * call this functin fo tell the service that the next line recieved is in responce to a command
+     */
+    void setWaitingForResponce()
+    {
+    	waiting_for_responce = true;
+    	responce = new String("");
+    }
+    
+    private void addResponce(byte[] data) throws UnsupportedEncodingException
+    {
+    	responce = responce + new String(data, "ASCII");
+    	//if we got a newline, then the current line is over
+    	if(responce.endsWith("\n"))
+    	{
+    		waiting_for_responce = false;
+    	}
+    }
+	
 	private final SerialInputOutputManager.Listener mListener =
             new SerialInputOutputManager.Listener() {
 
@@ -59,17 +75,32 @@ public class PrinterService extends Service {
         public void onRunError(Exception e) {
             Log.d(TAG, "Runner stopped.");
         }
-
+        
         @Override
         public void onNewData(final byte[] data) {
-//            PrinterService.this.runOnUiThread(new Runnable() {
+			//            PrinterService.this.runOnUiThread(new Runnable() {
 //                @Override
 //                public void run() {
 //                    
 //                }
 //            });
-        	
-        	PrinterService.this.updateReceivedData(data);
+        	if(!waiting_for_responce)
+        	{
+        		PrinterService.this.updateReceivedData(data);
+        	}
+        	//this is a bit of a jury-rig so that we can read the temperature without having to parse the entire console
+        	else
+        	{
+        		try 
+        		{
+        			addResponce(data);
+				} 
+        		catch (UnsupportedEncodingException e)
+        		{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
         }
     };
     
@@ -90,7 +121,7 @@ public class PrinterService extends Service {
         } else {
             try {
                 driver.open();
-                driver.setBaudRate(9600);
+                driver.setBaudRate(Settings.baudrate);
             } catch (IOException e) {
                 Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
                 consoleAddLine("Error opening device: " + e.getMessage());
@@ -137,7 +168,10 @@ public class PrinterService extends Service {
     
 
 
-	
+	/**
+	 * call this function to add a string and then a newline to the console.
+	 * @param toAdd the string to print
+	 */
 	void consoleAddLine(String toAdd)
 	{
 		currentConsole = currentConsole + toAdd + "\n";
@@ -146,7 +180,10 @@ public class PrinterService extends Service {
 			consoleListener.onNewConsole();
 		}
 	}
-	
+	/**
+	 * call this function to add a string to the console.
+	 * @param toAdd the string to print
+	 */	
 	void consoleAdd(String toAdd)
 	{
 		currentConsole = currentConsole + toAdd;
@@ -218,40 +255,6 @@ public class PrinterService extends Service {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-    }
-    
-    public void doConnect(View view)
-    {
-    	
-		UsbManager manager = (UsbManager)getSystemService(Context.USB_SERVICE);
-		driver = UsbSerialProber.acquire(manager);
-		
-		if(driver != null)
-		{
-			Log.i(TAG, "Device: " + driver.getDevice());
-		}
-		
-		
-    	if (driver == null) {
-            consoleAddLine("No serial device.");
-        } else {
-            try {
-                driver.open();
-                driver.setBaudRate(9600);
-            } catch (IOException e) {
-                Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
-                consoleAddLine("Error opening device: " + e.getMessage());
-                try {
-                    driver.close();
-                } catch (IOException e2) {
-                    // Ignore.
-                }
-                driver = null;
-                return;
-            }
-            consoleAddLine("Serial device: " + driver.getClass().getSimpleName());
-        }
-        onDeviceStateChange();
     }
     
 	public class MyLocalBinder extends Binder {

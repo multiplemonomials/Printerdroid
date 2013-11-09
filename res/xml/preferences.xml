@@ -4,6 +4,7 @@
     <PreferenceCategory android:title="Printer" android:key="prefs_printer">
          <EditTextPreference android:negativeButtonText="@android:string/cancel" android:dialogTitle="Bed Width" android:positiveButtonText="@android:string/ok" android:title="Bed Width" android:key="pref_bed_width" android:defaultValue="200" android:numeric="integer"/>
     <EditTextPreference android:negativeButtonText="@android:string/cancel" android:dialogTitle="Bed Height" android:positiveButtonText="@android:string/ok" android:title="Bed Height" android:key="pref_bed_height" android:defaultValue="200" android:numeric="integer"/>
+    <EditTextPreference android:dialogTitle="@string/baudrate" android:negativeButtonText="@android:string/cancel" android:positiveButtonText="@android:string/ok" android:key="pref_baudrate" android:title="@string/baudrate" android:defaultValue="9600"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

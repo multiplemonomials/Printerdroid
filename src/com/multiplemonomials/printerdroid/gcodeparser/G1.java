@@ -1,7 +1,10 @@
 package com.multiplemonomials.printerdroid.gcodeparser;
 
+import android.util.Log;
+
 public class G1 extends Gcode{
 	
+	private static final String TAG = "G1";
 	public Optional<Double> x_value;
 	public Optional<Double> y_value;
 	public Optional<Double> z_value;
@@ -52,6 +55,20 @@ public class G1 extends Gcode{
 		}
 
 		return new Optional<Double>(code_value);
+	}
+	
+	@Override
+	public String toString()
+	{
+		//rebuild the string that was originally used to make the object
+		String code = "G1";
+		code = code + x_value._variableValue != null ? x_value._variableValue.toString() : "";
+		code = code + y_value._variableValue != null ? y_value._variableValue.toString() : "";
+		code = code + z_value._variableValue != null ? z_value._variableValue.toString() : "";
+		code = code + e_value._variableValue != null ? e_value._variableValue.toString() : "";
+		
+		Log.d(TAG, "code line: " + code);
+		return code;
 	}
 
 }

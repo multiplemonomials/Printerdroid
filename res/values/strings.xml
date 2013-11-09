@@ -21,4 +21,6 @@
     <string name="print">Print</string>
     <string name="nofileloaded">No File Loaded</string>
     <string name="preferences">Printerdroid Preferences</string>
+    <string name="heatertemp">Set Temp</string>
+    <string name="baudrate">Baudrate</string>
 </resources>

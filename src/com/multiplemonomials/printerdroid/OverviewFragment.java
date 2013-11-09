@@ -22,5 +22,10 @@ public class OverviewFragment extends Fragment {
 		return view;
 	}
 	
+	public void setHeaterTemperature()
+	{
+		
+	}
+	
 
 }

@@ -66,24 +66,37 @@ public class ViewFragment extends Fragment implements OnTouchListener {
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) 
 	{
-		mGLView = new GLSurfaceView(getActivity().getApplication());
-	
-		mGLView.setEGLConfigChooser(new GLSurfaceView.EGLConfigChooser() {
-			public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
-				// Ensure that we get a 16bit framebuffer. Otherwise, we'll fall
-				// back to Pixelflinger on some device (read: Samsung I7500)
-				int[] attributes = new int[] { EGL10.EGL_DEPTH_SIZE, 16, EGL10.EGL_NONE };
-				EGLConfig[] configs = new EGLConfig[1];
-				int[] result = new int[1];
-				egl.eglChooseConfig(display, attributes, configs, 1, result);
-				return configs[0];
-			}
-		});
+		if(Settings.currentFile != null)
+		{
+			mGLView = new GLSurfaceView(getActivity().getApplication());
+			
+			mGLView.setEGLConfigChooser(new GLSurfaceView.EGLConfigChooser() {
+				public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
+					// Ensure that we get a 16bit framebuffer. Otherwise, we'll fall
+					// back to Pixelflinger on some device (read: Samsung I7500)
+					int[] attributes = new int[] { EGL10.EGL_DEPTH_SIZE, 16, EGL10.EGL_NONE };
+					EGLConfig[] configs = new EGLConfig[1];
+					int[] result = new int[1];
+					egl.eglChooseConfig(display, attributes, configs, 1, result);
+					return configs[0];
+				}
+			});
+			
+			//jPCT memory clearing function
+			MemoryHelper.compact();
+			
+			renderer = new MyRenderer();
+			mGLView.setRenderer(renderer);
+			mGLView.setOnTouchListener(this);
+			
+			return mGLView;
+		}
+
+		else
+		{
+			return inflater.inflate(R.layout.view, null, false);
+		}
 		
-		renderer = new MyRenderer();
-		mGLView.setRenderer(renderer);
-		mGLView.setOnTouchListener(this);
-		return mGLView;
 	}
 	
 	private void copy(Object src) {
@@ -140,65 +153,7 @@ public class ViewFragment extends Fragment implements OnTouchListener {
 		return false;
 	}
 
-//	  @Override
-//	    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//		  if(false/*Settings.currentFile != null*/)
-//          {
-//                 
-//                 
-//                 
-//                 /*
-//                  * this doesn't seem to work for some reason
-//                  */
-//                 //draw bed
-//                 //ArrayList<PathOnChart> bed = drawBed();
-//                 //for(PathOnChart path : bed)
-//                 //{
-//                         //paths.add(path);
-//                 //}
-//                 
-//                 //ArrayList<PointOnChart> points3 = new ArrayList<PointOnChart>();
-//                 //points3.add(new PointOnChart((Settings.bedWidth + 1), (Settings.bedHeight + 1)));
-//                 //paths.add(new PathOnChart(points3, pathAttributes1));
-//                 
-//                // LineChartAttributes lineChartAttributes = new LineChartAttributes();
-//                 //lineChartAttributes.setBackgroundColor("#aaabbb");
-//                 return new View(getActivity());
-//          }
-//          else
-//          {
-//
-//                  return inflater.inflate(R.layout.view, container, false);
-//          }
-//		  
-//		  
-//	  	}
-			  
-			  /**
-			   * draws the bed according to the dimensions in settings
-			   * @return an arraylist of paths
-			   */
-//			  private ArrayList<PathOnChart> drawBed()
-//			  {
-//				  	ArrayList<PathOnChart> paths = new ArrayList<PathOnChart>();
-//					PathAttributes pathAttributes1 = new PathAttributes();
-//					pathAttributes1.setPointColor("#00AAAAAA");
-//					pathAttributes1.setPathColor("#FF302F");
-//					//|
-//					//|
-//					//|
-//					paths.add(new Line3D(drawPath(0, 0, 0, Settings.bedHeight, 0));
-//					//---
-//					paths.add(new PathOnChart(drawPath(Settings.bedWidth, 0, 0, 0, 0), pathAttributes1));
-//					//   |
-//					//   |
-//					//   |
-//					paths.add(new PathOnChart(drawPath(Settings.bedWidth, 0, Settings.bedWidth, Settings.bedHeight, 0), pathAttributes1));
-//					//---
-//					paths.add(new PathOnChart(drawPath(0, Settings.bedHeight, Settings.bedWidth, Settings.bedHeight, 0), pathAttributes1));
-//					return paths;
-//				  
-//			  }
+
 			  
 			  class MyRenderer implements GLSurfaceView.Renderer {
 
@@ -237,10 +192,9 @@ public class ViewFragment extends Fragment implements OnTouchListener {
 
 							Camera cam = world.getCamera();
 							cam.moveCamera(Camera.CAMERA_MOVEOUT, 50);
-							cam.lookAt(object.getTransformedCenter());
+							cam.lookAt(new SimpleVector(100, 100, 50));
 
-							SimpleVector sv = new SimpleVector();
-							sv.set(object.getTransformedCenter());
+							SimpleVector sv = new SimpleVector(Settings.bedWidth/2, Settings.bedHeight/2, 50);
 							sv.y -= 100;
 							sv.z -= 100;
 							sun.setPosition(sv);
