@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
@@ -19,7 +20,21 @@ public class Settings {
 	
 	public static int baudrate = 9600;
 	
+	public static int heater_temp = 200;
+	
+	public static int bed_temp = 80;
+	
 	public static List<Layer> currentFile;
+	
+	public static Uri currentFilePath;
+	
+	public static boolean current_heater_state_on = false;
+	
+	public static boolean current_bed_state_on = false;
+
+	public static int current_heater_temp = 0;
+
+	public static int current_bed_temp = 0;
 
 	public static void regenerate(Context context) 
 	{
@@ -30,6 +45,8 @@ public class Settings {
 			bedWidth = Integer.parseInt(sharedPreferences.getString("pref_bed_width", ""));
 			bedHeight = Integer.parseInt(sharedPreferences.getString("pref_bed_height", ""));
 			baudrate = Integer.parseInt(sharedPreferences.getString("pref_baudrate", ""));
+			heater_temp = Integer.parseInt(sharedPreferences.getString("pref_heater_default_temp", ""));
+			bed_temp = Integer.parseInt(sharedPreferences.getString("pref_bed_default_temp", ""));
 		}
 		catch(Exception e)
 		{

@@ -11,18 +11,17 @@ public class BarView extends View {
 	
 	Paint paint;
 	
-	//tells us the layer that we should be drawing
-	public int layerToDraw = 0;
+	int maxDegrees;
 	
-	int height;
-	
-	int width;
+	float currentWidthInPixels;
 
 	public BarView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		paint = new Paint();
 		paint.setColor(Color.RED);
+		
 		this.setBackgroundColor(Color.WHITE);
+		
 	}
 	
 	public BarView(Context context) {
@@ -31,14 +30,8 @@ public class BarView extends View {
 		paint = new Paint();
 		paint.setColor(Color.RED);
 		this.setBackgroundColor(Color.WHITE);
+		
 	}
-	
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus)
-	{
-		super.onWindowFocusChanged(hasFocus);
-	}
-	
 	public void setColor(int color)
 	{
 		paint.setColor(color);
@@ -49,9 +42,21 @@ public class BarView extends View {
 	{
 		super.onDraw(canvas);
 		
-		
-		
+		canvas.drawRect(0, 0, currentWidthInPixels, getHeight(), paint);
 	}
+	
+	public void setMaxDegrees(int max)
+	{
+		maxDegrees = max;
+	}
+	
+	public void setCurrentDegrees(int current)
+	{
+		currentWidthInPixels = current * (getWidth() / maxDegrees);
+		invalidate();
+	}
+	
+	
 	
 	
 

@@ -21,6 +21,16 @@
     <string name="print">Print</string>
     <string name="nofileloaded">No File Loaded</string>
     <string name="preferences">Printerdroid Preferences</string>
-    <string name="heatertemp">Set Temp</string>
+    <string name="heater_set_temp">Set Temp</string>
     <string name="baudrate">Baudrate</string>
+    <string name="bedtemp">Bed Temperature</string>
+    <string name="heatertemp">Heater Temperature</string>
+    <string name="summary_heatertemp">Extruder heater temperature</string>
+    <string name="summary_bedtemp">Bed heater temperature</string>
+    <string name="bedtempindicator">"Bed Temp: "</string>
+    <string name="heatertempindicator">"Heater Temp: "</string>
+    <string name="currentlayer">Current Layer: </string>
+    <string name="turn_on">"Turn On: "</string>
+    <string name="turn_off">"Turn Off: "</string>
+    <string name="degrees_centegrade">°C</string>
 </resources>

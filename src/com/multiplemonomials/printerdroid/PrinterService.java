@@ -1,6 +1,10 @@
 package com.multiplemonomials.printerdroid;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,11 +13,14 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.multiplemonomials.androidutils.LineReader;
+import com.multiplemonomials.androidutils.progressbox.*;
 
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -240,7 +247,7 @@ public class PrinterService extends Service {
         }
     }
     
-    public void doSend(String string)
+    public void send(String string)
     {
 
         	try 
@@ -267,6 +274,17 @@ public class PrinterService extends Service {
 	{
 		currentConsole = "";
 		consoleListener.onNewConsole();
+	}
+	
+	ProgressBoxManager progressDialog;
+
+	public void print(Uri currentFilePath, MainActivity mainActivity) throws FileNotFoundException 
+	{
+		File file = new File(currentFilePath.getPath());
+		InputStream inputStream = new FileInputStream(file);
+		LineReader lineReader = new LineReader(inputStream);
+		PrintAsyncTask printAsyncTask = new PrintAsyncTask(mainActivity);
+		printAsyncTask.execute(lineReader);
 	}
 
 

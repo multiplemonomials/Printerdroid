@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import com.multiplemonomials.androidutils.LineReader;
+import com.multiplemonomials.androidutils.Pair;
 import com.multiplemonomials.androidutils.preferencesmanager.PreferencesActivity;
 import com.multiplemonomials.androidutils.progressbox.ErrorDialog;
 import com.multiplemonomials.androidutils.progressbox.ProgressBoxManager;
@@ -82,6 +83,8 @@ public class MainActivity extends Activity implements ConsoleListener {
 	public static Context appContext;
 	
 	ConsoleFragment consoleFragment;
+	
+	OverviewFragment overviewFragment;
 	
 	PrinterService myService;
 	
@@ -130,7 +133,7 @@ public class MainActivity extends Activity implements ConsoleListener {
         
         consoleFragment = new ConsoleFragment();
         Fragment viewFragment = new ViewFragment();
-        Fragment overviewFragment = new OverviewFragment();
+        overviewFragment = new OverviewFragment();
 
         ConsoleTab.setTabListener(new MyTabsListener(consoleFragment));
         ViewTab.setTabListener(new MyTabsListener(viewFragment));
@@ -173,7 +176,7 @@ public class MainActivity extends Activity implements ConsoleListener {
     				{
     					myService.setWaitingForResponce();
     					//M105 tells the printer to print back its temperatures
-    					MainActivity.this.myService.doSend("M105");
+    					MainActivity.this.myService.send("M105");
     				}
     				//wait a while
     				try 
@@ -184,20 +187,31 @@ public class MainActivity extends Activity implements ConsoleListener {
     					return;
     				}
     				
+    				//get responce
     				if(myService != null && myService.driver != null)
     				{
     					if(myService.responce != null && myService.responce.endsWith("\n"))
     					{
     						
-    						int heaterTempIndex = MainActivity.this.myService.responce.indexOf("T:") + 2;
-    						
     						try
     						{
+        						int heaterTempIndex = MainActivity.this.myService.responce.indexOf("T:") + 2;
     							String intermediaryHeaterTemp = MainActivity.this.myService.responce.substring(heaterTempIndex);
-    							//sometimes it seems like the second half of the temp command responce command gets cut off
-    							//which is fine. because that's what we were trying to do anyway
+    							
     							int bedTempIndex = intermediaryHeaterTemp.indexOf("B");
     							String heaterTempString;
+    							//make a new string with a new backing array
+    							String bedTempString = new String(intermediaryHeaterTemp);
+    							if(bedTempString.indexOf("B:") != -1)
+    							{
+    								bedTempString = bedTempString.substring((bedTempString.indexOf("B:") + 2));
+    								//remove ending carriage return and newline 
+    								bedTempString = bedTempString.substring(0, bedTempString.length() - 2);
+    							}
+    								
+    							
+    							//sometimes it seems like the second half of the temp command responce command gets cut off
+    							//which is fine. because that's what we were trying to do anyway
     							if(bedTempIndex != -1)
     							{
     								heaterTempString = intermediaryHeaterTemp.substring(0, bedTempIndex - 1);
@@ -206,13 +220,32 @@ public class MainActivity extends Activity implements ConsoleListener {
     							{
     								heaterTempString = intermediaryHeaterTemp;
     							}
+    							
+    							Settings.current_heater_temp = Integer.parseInt(heaterTempString);
+    							Settings.current_bed_temp = Integer.parseInt(bedTempString);
+    							
+    							//check if the overview fragment is being shown
+    							if(MainActivity.this.overviewFragment.heaterTempTextView != null)
+    							{
+        							runOnUiThread(new Runnable()
+        							{
 
-    							int heaterTemp = Integer.parseInt(heaterTempString);
-    							Log.i(TAG, "heaterTemp: " + heaterTemp);	
+    									@Override
+    									public void run() {
+    										MainActivity.this.overviewFragment.setHeaterTemperatureView(Settings.current_heater_temp);
+    										MainActivity.this.overviewFragment.setBedTemperatureView(Settings.current_bed_temp);			
+    									}
+        								
+        							});
+    							}
     						}
     						catch(NumberFormatException error)
     						{
     							Log.e("PrinterdroidTemperatureThread", "Failed to parse temperature: " + MainActivity.this.myService.responce);
+    						}
+    						catch(StringIndexOutOfBoundsException error)
+    						{
+    							Log.e("PrinterdroidTemperatureThread", "Length of temperature responce is wrong: " + MainActivity.this.myService.responce);
     						}
     					
     					}
@@ -231,6 +264,15 @@ public class MainActivity extends Activity implements ConsoleListener {
     	super.onPause();
     	//signal the temperature checking thread to shutdown.
     	temperatureChecker.interrupt();
+    }
+    
+    @Override
+    public void onDestroy()
+    {
+    	super.onDestroy();
+    	unbindService(myConnection);
+    	temperatureChecker.interrupt();
+    	myService = null;
     }
     
     @Override
@@ -286,7 +328,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 		//if a driver is not connected, show an error dialog.
 		if(myService.driver != null)
 		{
-			myService.doSend(consoleFragment.editText.getText().toString());
+			myService.send(consoleFragment.editText.getText().toString());
 		}
 		else
 		{
@@ -362,6 +404,44 @@ public class MainActivity extends Activity implements ConsoleListener {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	void onClickPrint(View view)
+	{
+		try 
+		{
+			myService.print(Settings.currentFilePath, this);
+		} 
+		catch (FileNotFoundException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	//called by PrintAsyncTask when it wants us to show the progress bar
+	public void showLayerProgressBar() 
+	{
+		//at some point I would like to have some sort of transition that pops out the progress bar
+	}
+
+	/**Called by PrintAsyncTask every time it finishes printing a layer.
+	 * Changes the value of OverviewFragment's progress bar
+	 * 
+	 * @param progress a pair holding the current layer and the current line, respectively
+	 */
+	public void updateLayerProgressBar(Pair<Integer, Integer> progress) 
+	{
+		assert(overviewFragment.layerProgressView != null);
+		overviewFragment.layerProgressView.setMax(Settings.currentFile.size());
+		overviewFragment.layerProgressView.setProgress(progress._first);
+		overviewFragment.layerTextView.setText(getResources().getString(R.string.currentlayer) + progress._first);
+	}
+
+	public void closeLayerProgressBar() 
+	{
+		//at some point I would like to have some sort of transition that hides the progress bar
+		
 	}
 
 	    
