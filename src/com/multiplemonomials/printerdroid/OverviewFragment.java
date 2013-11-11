@@ -60,7 +60,7 @@ public class OverviewFragment extends Fragment
 	
 	public void setBedTemperatureView(int temp)
 	{
-		if(bedTempView != null)
+		if(bedTempView != null && isAdded())
 		{
 			bedTempView.setCurrentDegrees(temp);
 			
