@@ -5,23 +5,44 @@
     android:orientation="vertical" >
 
     <LinearLayout
-        style="?android:attr/buttonBarButtonStyle"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
         <Button
             android:id="@+id/button1"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onClickPrint"
-            android:text="@string/print" />
+            android:text="@string/print"
+            android:textSize="16sp" />
 
         <Button
             android:id="@+id/loadfilebutton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onClickLoadFile"
-            android:text="@string/loadfile" />
+            android:text="@string/loadfile"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/button4"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickPrinterOnOff"
+            android:text="@string/turn_on_printer"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/button5"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/turn_off_printer"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
@@ -63,7 +84,9 @@
             android:id="@+id/button2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onClickHeaterOnOff"
             android:text="@string/turn_on" />
+
     </LinearLayout>
 
     <TextView
@@ -86,7 +109,9 @@
             android:id="@+id/button3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onClickBedOnOff"
             android:text="@string/turn_on" />
+
     </LinearLayout>
 
 </LinearLayout>

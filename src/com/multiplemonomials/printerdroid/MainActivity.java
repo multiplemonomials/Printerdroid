@@ -74,6 +74,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements ConsoleListener {
@@ -406,16 +407,35 @@ public class MainActivity extends Activity implements ConsoleListener {
 		return null;
 	}
 	
-	void onClickPrint(View view)
+	public void onClickPrint(View view)
 	{
-		try 
+		Button button = (Button) view;
+		
+		//if we're currently printing, the button turns to cancel
+		if(!Settings.isPrinting)
 		{
-			myService.print(Settings.currentFilePath, this);
-		} 
-		catch (FileNotFoundException e) 
+			if(Settings.currentFile != null)
+			{
+				try 
+				{
+					myService.print(Settings.currentFilePath, this);
+				} 
+				catch (FileNotFoundException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				button.setText(getResources().getString(android.R.string.cancel));
+			}
+			else
+			{
+				Toast.makeText(this, "No File Loaded", Toast.LENGTH_SHORT).show();
+			}
+		}
+		else
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myService.cancelPrint();
+			button.setText(getResources().getString(R.string.print));
 		}
 	}
 
@@ -442,6 +462,71 @@ public class MainActivity extends Activity implements ConsoleListener {
 	{
 		//at some point I would like to have some sort of transition that hides the progress bar
 		
+	}
+	
+	/**
+	 * Button handler for the button that turns the printer on or off
+	 * 
+	 */
+	public void onClickPrinterOnOff(View view)
+	{
+		Button button = (Button) view;
+		if(Settings.printerIsOn)
+		{
+			button.setText(getResources().getString(R.string.turn_on_printer));
+			//M81 = printer off
+			myService.send("M81");
+			Settings.printerIsOn = false;
+		}
+		else
+		{
+			button.setText(getResources().getString(R.string.turn_off_printer));
+			//M80 = printer off
+			myService.send("M80");
+			Settings.printerIsOn = true;
+		}
+	}
+	
+	public void onClickHeaterOnOff(View view)
+	{
+		Button button = (Button) view;
+		if(Settings.current_heater_state_on)
+		{
+			//we need to toggle the heater off
+			button.setText(getResources().getString(R.string.turn_on) + "0" + getResources().getString(R.string.degrees_centegrade));
+			//M104 Sxxx= set extruder temp
+			myService.send("M104 S0");
+			Settings.current_heater_state_on = false;
+		}
+		else
+		{
+			//we need to turn the heater on
+			button.setText(getResources().getString(R.string.turn_off) + Settings.target_heater_temp + getResources().getString(R.string.degrees_centegrade));
+			//M104 Sxxx= set extruder temp
+			myService.send("M104 S " + Settings.target_heater_temp);
+			Settings.current_heater_state_on = true;
+		}
+	}
+	
+	public void onClickBedOnOff(View view)
+	{
+		Button button = (Button) view;
+		if(Settings.current_bed_state_on)
+		{
+			//we need to toggle the heater off
+			button.setText(getResources().getString(R.string.turn_on) + "0" + getResources().getString(R.string.degrees_centegrade));
+			//M109 Sxxx= set bed temp
+			myService.send("M109 S0");
+			Settings.current_bed_state_on = false;
+		}
+		else
+		{
+			//we need to turn the heater on
+			button.setText(getResources().getString(R.string.turn_off) + Settings.target_bed_temp + getResources().getString(R.string.degrees_centegrade));
+			//M109 Sxxx= set bed temp
+			myService.send("M109 S " + Settings.target_bed_temp);
+			Settings.current_bed_state_on = true;
+		}
 	}
 
 	    

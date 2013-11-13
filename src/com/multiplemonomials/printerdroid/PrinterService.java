@@ -215,7 +215,7 @@ public class PrinterService extends Service {
 	}
 	
 	final protected static char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-	public static String bytesToHex(byte[] bytes) {
+	public static String bytesToHexString(byte[] bytes) {
 	    char[] hexChars = new char[bytes.length * 2];
 	    int v;
 	    for ( int j = 0; j < bytes.length; j++ ) {
@@ -252,8 +252,12 @@ public class PrinterService extends Service {
 
         	try 
         	{
-        		byte[] bytes = (string + "\n").getBytes();
-        		Log.i(TAG, "Sending bytes: " + bytesToHex(bytes));
+        		if(!string.endsWith("\n"))
+        		{
+        			string = string + "\n";
+        		}
+        		byte[] bytes = string.getBytes();
+        		Log.i(TAG, "Sending bytes: " + bytesToHexString(bytes));
         		Log.i(TAG, "Dump: " + HexDump.dumpHexString(bytes));
 				driver.write(bytes, 1000);
 			} 
@@ -277,6 +281,8 @@ public class PrinterService extends Service {
 	}
 	
 	ProgressBoxManager progressDialog;
+	
+	PrintAsyncTask printAsyncTask;
 
 	public void print(Uri currentFilePath, MainActivity mainActivity) throws FileNotFoundException 
 	{
@@ -285,6 +291,14 @@ public class PrinterService extends Service {
 		LineReader lineReader = new LineReader(inputStream);
 		PrintAsyncTask printAsyncTask = new PrintAsyncTask(mainActivity);
 		printAsyncTask.execute(lineReader);
+	}
+	
+	public void cancelPrint()
+	{
+		if(printAsyncTask != null)
+		{
+			printAsyncTask.cancel(false);
+		}
 	}
 
 

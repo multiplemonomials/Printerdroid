@@ -33,4 +33,6 @@
     <string name="turn_on">"Turn On: "</string>
     <string name="turn_off">"Turn Off: "</string>
     <string name="degrees_centegrade">°C</string>
+    <string name="turn_on_printer">Printer On</string>
+    <string name="turn_off_printer">Printer Off</string>
 </resources>

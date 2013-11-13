@@ -20,9 +20,12 @@ public class Settings {
 	
 	public static int baudrate = 9600;
 	
-	public static int heater_temp = 200;
+	public static int target_heater_temp = 200;
 	
-	public static int bed_temp = 80;
+	public static int target_bed_temp = 80;
+	
+//global app data
+//----------------------------------------------------------------------------------
 	
 	public static List<Layer> currentFile;
 	
@@ -35,6 +38,10 @@ public class Settings {
 	public static int current_heater_temp = 0;
 
 	public static int current_bed_temp = 0;
+	
+	public static boolean isPrinting = false;
+	
+	public static boolean printerIsOn = false;
 
 	public static void regenerate(Context context) 
 	{
@@ -45,8 +52,8 @@ public class Settings {
 			bedWidth = Integer.parseInt(sharedPreferences.getString("pref_bed_width", ""));
 			bedHeight = Integer.parseInt(sharedPreferences.getString("pref_bed_height", ""));
 			baudrate = Integer.parseInt(sharedPreferences.getString("pref_baudrate", ""));
-			heater_temp = Integer.parseInt(sharedPreferences.getString("pref_heater_default_temp", ""));
-			bed_temp = Integer.parseInt(sharedPreferences.getString("pref_bed_default_temp", ""));
+			target_heater_temp = Integer.parseInt(sharedPreferences.getString("pref_heater_default_temp", ""));
+			target_bed_temp = Integer.parseInt(sharedPreferences.getString("pref_bed_default_temp", ""));
 		}
 		catch(Exception e)
 		{

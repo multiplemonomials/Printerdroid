@@ -31,12 +31,12 @@ public class OverviewFragment extends Fragment
 		
 		heaterTempView = (BarView) view.findViewById(R.id.barView1);
 		heaterTempView.setColor(Color.RED);
-		heaterTempView.setMaxDegrees(Settings.heater_temp);
+		heaterTempView.setMaxDegrees(Settings.target_heater_temp);
 		
 		bedTempView = (BarView) view.findViewById(R.id.barView2);
 		//set color to ORANGE!
 		bedTempView.setColor(Color.parseColor("#FFA500"));
-		bedTempView.setMaxDegrees(Settings.heater_temp);
+		bedTempView.setMaxDegrees(Settings.target_heater_temp);
 		
 		layerProgressView = (ProgressBar) view.findViewById(R.id.progressBar1);
 		
@@ -49,7 +49,7 @@ public class OverviewFragment extends Fragment
 	
 	public void setHeaterTemperatureView(int temp)
 	{
-		if(heaterTempView != null)
+		if(heaterTempView != null && isAdded())
 		{
 			heaterTempView.setCurrentDegrees(temp);
 			

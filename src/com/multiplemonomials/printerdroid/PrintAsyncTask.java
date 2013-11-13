@@ -30,6 +30,11 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 	{
 		while(true)
 		{
+			if(isCancelled())
+			{
+				return false;
+			}
+			
 			try 
 			{
 				String line = params[0].readNextLine();
@@ -61,6 +66,7 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 	@Override
 	protected void onPreExecute()
 	{
+		Settings.isPrinting = true;
 		_mainActivity.showLayerProgressBar();
 	}
 	
@@ -72,6 +78,7 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 	@Override
 	protected void onPostExecute(Boolean result)
 	{
+		Settings.isPrinting = false;
 		_mainActivity.closeLayerProgressBar();
 	}
 
