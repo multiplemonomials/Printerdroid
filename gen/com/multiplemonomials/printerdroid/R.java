@@ -33,20 +33,22 @@ public final class R {
         public static final int icon_view_tab=0x7f020004;
     }
     public static final class id {
-        public static final int barView1=0x7f0a000b;
-        public static final int barView2=0x7f0a000c;
+        public static final int barView1=0x7f0a000d;
+        public static final int barView2=0x7f0a000e;
         public static final int bedTempTextView=0x7f0a0001;
         public static final int button1=0x7f0a0003;
         public static final int button2=0x7f0a0004;
         public static final int button3=0x7f0a0005;
+        public static final int button4=0x7f0a0008;
+        public static final int button5=0x7f0a0009;
         public static final int console=0x7f0a0006;
         public static final int consoleInput=0x7f0a0002;
-        public static final int currentLayerTextView=0x7f0a0008;
+        public static final int currentLayerTextView=0x7f0a000a;
         public static final int fragment_container=0x7f0a0000;
-        public static final int heaterTempTextView=0x7f0a000a;
+        public static final int heaterTempTextView=0x7f0a000c;
         public static final int loadfilebutton=0x7f0a0007;
-        public static final int menuitem_preferences=0x7f0a000d;
-        public static final int progressBar1=0x7f0a0009;
+        public static final int menuitem_preferences=0x7f0a000f;
+        public static final int progressBar1=0x7f0a000b;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -97,7 +99,9 @@ public final class R {
         public static final int summary_bedtemp=0x7f070018;
         public static final int summary_heatertemp=0x7f070017;
         public static final int turn_off=0x7f07001d;
+        public static final int turn_off_printer=0x7f070020;
         public static final int turn_on=0x7f07001c;
+        public static final int turn_on_printer=0x7f07001f;
     }
     public static final class style {
         /** 

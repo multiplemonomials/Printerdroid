@@ -515,16 +515,16 @@ public class MainActivity extends Activity implements ConsoleListener {
 		{
 			//we need to toggle the heater off
 			button.setText(getResources().getString(R.string.turn_on) + "0" + getResources().getString(R.string.degrees_centegrade));
-			//M109 Sxxx= set bed temp
-			myService.send("M109 S0");
+			//M140 Sxxx= set bed temp
+			myService.send("M140 S0");
 			Settings.current_bed_state_on = false;
 		}
 		else
 		{
 			//we need to turn the heater on
 			button.setText(getResources().getString(R.string.turn_off) + Settings.target_bed_temp + getResources().getString(R.string.degrees_centegrade));
-			//M109 Sxxx= set bed temp
-			myService.send("M109 S " + Settings.target_bed_temp);
+			//M140 Sxxx= set bed temp
+			myService.send("M140 S " + Settings.target_bed_temp);
 			Settings.current_bed_state_on = true;
 		}
 	}
