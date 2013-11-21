@@ -252,14 +252,19 @@ public class PrinterService extends Service {
 
         	try 
         	{
-        		if(!string.endsWith("\n"))
+        		if(driver != null)
         		{
-        			string = string + "\n";
+            		if(!string.endsWith("\n"))
+            		{
+            			string = string + "\n";
+            		}
+            		byte[] bytes = string.getBytes();
+            		Log.i(TAG, "Sending bytes: " + bytesToHexString(bytes));
+            		Log.i(TAG, "Dump: " + HexDump.dumpHexString(bytes));
+    				driver.write(bytes, 1000);
         		}
-        		byte[] bytes = string.getBytes();
-        		Log.i(TAG, "Sending bytes: " + bytesToHexString(bytes));
-        		Log.i(TAG, "Dump: " + HexDump.dumpHexString(bytes));
-				driver.write(bytes, 1000);
+        		else
+        		Log.w(TAG, "Trying to send data over uninitialized serial connection");
 			} 
         	catch (IOException e) 
         	{
