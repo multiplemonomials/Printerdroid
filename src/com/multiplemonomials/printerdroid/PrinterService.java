@@ -52,17 +52,33 @@ public class PrinterService extends Service {
 	
 	private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 	
-    private boolean waiting_for_responce;
+    private Boolean waiting_for_responce;
     
-    public String responce;
+    private String responce;
     
     /**
-     * call this functin fo tell the service that the next line recieved is in responce to a command
+     * Use this to ask for a response to the command you just sent.
+     * 
+     * Blocks until a line is received.
      */
-    void setWaitingForResponce()
+    public synchronized String sendCommandWithResponce(String toSend)
     {
+    	//send a signal to the receiver thread
     	waiting_for_responce = true;
+    	
     	responce = new String("");
+    	send(toSend);
+    	try 
+    	{
+			waiting_for_responce.wait();
+		}
+    	catch (InterruptedException e)
+    	{
+			e.printStackTrace();
+		}
+    	waiting_for_responce = false;
+    	
+    	return responce;
     }
     
     private void addResponce(byte[] data) throws UnsupportedEncodingException
@@ -71,12 +87,12 @@ public class PrinterService extends Service {
     	//if we got a newline, then the current line is over
     	if(responce.endsWith("\n"))
     	{
-    		waiting_for_responce = false;
+    		waiting_for_responce.notify();;
     	}
     }
 	
-	private final SerialInputOutputManager.Listener mListener =
-            new SerialInputOutputManager.Listener() {
+	private final SerialInputOutputManager.Listener mListener = new SerialInputOutputManager.Listener() 
+	{
 
         @Override
         public void onRunError(Exception e) {
@@ -84,13 +100,8 @@ public class PrinterService extends Service {
         }
         
         @Override
-        public void onNewData(final byte[] data) {
-			//            PrinterService.this.runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    
-//                }
-//            });
+        public void onNewData(final byte[] data) 
+        {
         	if(!waiting_for_responce)
         	{
         		PrinterService.this.updateReceivedData(data);
@@ -104,7 +115,6 @@ public class PrinterService extends Service {
 				} 
         		catch (UnsupportedEncodingException e)
         		{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
         	}
@@ -264,7 +274,9 @@ public class PrinterService extends Service {
     				driver.write(bytes, 1000);
         		}
         		else
-        		Log.w(TAG, "Trying to send data over uninitialized serial connection");
+        		{
+            		Log.w(TAG, "Trying to send data over uninitialized serial connection");
+        		}
 			} 
         	catch (IOException e) 
         	{

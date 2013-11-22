@@ -173,34 +173,20 @@ public class MainActivity extends Activity implements ConsoleListener {
     			{
     				assert(MainActivity.this.myService != null);
     				
-    				if(myService != null && myService.driver != null)
-    				{
-    					myService.setWaitingForResponce();
-    					//M105 tells the printer to print back its temperatures
-    					MainActivity.this.myService.send("M105");
-    				}
-    				//wait a while
-    				try 
-    				{
-    					sleep(2000);
-    				} catch (InterruptedException e) 
-    				{
-    					return;
-    				}
-    				
     				//get responce
     				if(myService != null && myService.driver != null)
     				{
-    					if(myService.responce != null && myService.responce.endsWith("\n"))
+    					String responce = MainActivity.this.myService.sendCommandWithResponce("M105");
+    					
+    					if(responce != null && responce.endsWith("\n"))
     					{
     						
     						try
     						{
-        						int heaterTempIndex = MainActivity.this.myService.responce.indexOf("T:") + 2;
-    							String intermediaryHeaterTemp = MainActivity.this.myService.responce.substring(heaterTempIndex);
+        						int heaterTempIndex = responce.indexOf("T:") + 2;
+    							String intermediaryHeaterTemp = responce.substring(heaterTempIndex);
     							
     							int bedTempIndex = intermediaryHeaterTemp.indexOf("B");
-    							String heaterTempString;
     							//make a new string with a new backing array
     							String bedTempString = new String(intermediaryHeaterTemp);
     							if(bedTempString.indexOf("B:") != -1)
@@ -213,6 +199,7 @@ public class MainActivity extends Activity implements ConsoleListener {
     							
     							//sometimes it seems like the second half of the temp command responce command gets cut off
     							//which is fine. because that's what we were trying to do anyway
+    							String heaterTempString;
     							if(bedTempIndex != -1)
     							{
     								heaterTempString = intermediaryHeaterTemp.substring(0, bedTempIndex - 1);
@@ -242,11 +229,11 @@ public class MainActivity extends Activity implements ConsoleListener {
     						}
     						catch(NumberFormatException error)
     						{
-    							Log.e("PrinterdroidTemperatureThread", "Failed to parse temperature: " + MainActivity.this.myService.responce);
+    							Log.e("PrinterdroidTemperatureThread", "Failed to parse temperature: " + responce);
     						}
     						catch(StringIndexOutOfBoundsException error)
     						{
-    							Log.e("PrinterdroidTemperatureThread", "Length of temperature responce is wrong: " + MainActivity.this.myService.responce);
+    							Log.e("PrinterdroidTemperatureThread", "Length of temperature responce is wrong: " + responce);
     						}
     					
     					}
@@ -362,6 +349,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 			if(data != null)
 			{
 				Uri fileUri = data.getData();
+				Settings.currentFilePath = fileUri;
 				File file = new File(fileUri.getPath());
 				Log.v(TAG, "Loaded file " + file.getPath());
 				Log.v(TAG, "File exists: " + file.exists());

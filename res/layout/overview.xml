@@ -36,14 +36,6 @@
             android:text="@string/turn_on_printer"
             android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/button5"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/turn_off_printer"
-            android:textSize="16sp" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -81,7 +73,7 @@
             android:layout_weight="0.59" />
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/heaterOnOffButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onClickHeaterOnOff"
@@ -106,7 +98,7 @@
             android:layout_weight="0.59" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/bedOnOffButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onClickBedOnOff"

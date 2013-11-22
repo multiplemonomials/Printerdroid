@@ -54,6 +54,8 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 					break;
 				}
 				
+				//now we need to wait for the response that we have the clearence to start again.
+				
 			} 
 			catch (IOException e) 
 			{

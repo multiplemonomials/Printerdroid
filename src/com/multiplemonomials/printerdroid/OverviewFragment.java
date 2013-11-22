@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -43,6 +44,13 @@ public class OverviewFragment extends Fragment
 		layerTextView = (TextView) view.findViewById(R.id.currentLayerTextView);
 		heaterTempTextView = (TextView) view.findViewById(R.id.heaterTempTextView);
 		bedTempTextView = (TextView) view.findViewById(R.id.bedTempTextView);
+		
+		Button heaterOnOff = (Button) view.findViewById(R.id.heaterOnOffButton);
+		Button bedOnOff = (Button) view.findViewById(R.id.bedOnOffButton);
+		
+		heaterOnOff.setText(getResources().getString(R.string.turn_on) + Settings.target_heater_temp + getResources().getString(R.string.degrees_centegrade));
+		bedOnOff.setText(getResources().getString(R.string.turn_on) + Settings.target_bed_temp + getResources().getString(R.string.degrees_centegrade));
+		
 		
 		return view;
 	}
