@@ -176,7 +176,7 @@ public class MainActivity extends Activity implements ConsoleListener {
     				//get responce
     				if(myService != null && myService.driver != null)
     				{
-    					String responce = MainActivity.this.myService.sendCommandWithResponce("M105");
+    					String responce = MainActivity.this.myService.send("M105");
     					
     					if(responce != null && responce.endsWith("\n"))
     					{
@@ -238,6 +238,16 @@ public class MainActivity extends Activity implements ConsoleListener {
     					
     					}
     				}
+    				
+    				try 
+    				{
+						sleep(3000);
+					}
+    				catch (InterruptedException e) 
+    				{
+						return;
+					}
+    				
     			}
     			
     			Log.i(TAG, "Shutting down...");
@@ -316,7 +326,8 @@ public class MainActivity extends Activity implements ConsoleListener {
 		//if a driver is not connected, show an error dialog.
 		if(myService.driver != null)
 		{
-			myService.send(consoleFragment.editText.getText().toString());
+			String response = myService.send(consoleFragment.editText.getText().toString());
+			myService.consoleAdd(response);
 		}
 		else
 		{
@@ -481,7 +492,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 		if(Settings.current_heater_state_on)
 		{
 			//we need to toggle the heater off
-			button.setText(getResources().getString(R.string.turn_on) + "0" + getResources().getString(R.string.degrees_centegrade));
+			button.setText(getResources().getString(R.string.turn_on) + Settings.target_heater_temp + getResources().getString(R.string.degrees_centegrade));
 			//M104 Sxxx= set extruder temp
 			myService.send("M104 S0");
 			Settings.current_heater_state_on = false;
@@ -489,7 +500,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 		else
 		{
 			//we need to turn the heater on
-			button.setText(getResources().getString(R.string.turn_off) + Settings.target_heater_temp + getResources().getString(R.string.degrees_centegrade));
+			button.setText(getResources().getString(R.string.turn_off) + "0" + getResources().getString(R.string.degrees_centegrade));
 			//M104 Sxxx= set extruder temp
 			myService.send("M104 S " + Settings.target_heater_temp);
 			Settings.current_heater_state_on = true;
@@ -502,7 +513,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 		if(Settings.current_bed_state_on)
 		{
 			//we need to toggle the heater off
-			button.setText(getResources().getString(R.string.turn_on) + "0" + getResources().getString(R.string.degrees_centegrade));
+			button.setText(getResources().getString(R.string.turn_on) + Settings.target_bed_temp + getResources().getString(R.string.degrees_centegrade));
 			//M140 Sxxx= set bed temp
 			myService.send("M140 S0");
 			Settings.current_bed_state_on = false;
@@ -510,7 +521,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 		else
 		{
 			//we need to turn the heater on
-			button.setText(getResources().getString(R.string.turn_off) + Settings.target_bed_temp + getResources().getString(R.string.degrees_centegrade));
+			button.setText(getResources().getString(R.string.turn_off) + "0" + getResources().getString(R.string.degrees_centegrade));
 			//M140 Sxxx= set bed temp
 			myService.send("M140 S " + Settings.target_bed_temp);
 			Settings.current_bed_state_on = true;
@@ -522,25 +533,30 @@ public class MainActivity extends Activity implements ConsoleListener {
 
 
 
-class MyTabsListener implements ActionBar.TabListener {
+class MyTabsListener implements ActionBar.TabListener
+{
 	public Fragment fragment;
 	
-	public MyTabsListener(Fragment fragment) {
+	public MyTabsListener(Fragment fragment) 
+	{
 		this.fragment = fragment;
 	}
 	
 	@Override
-	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+	public void onTabReselected(Tab tab, FragmentTransaction ft) 
+	{
 		Toast.makeText(MainActivity.appContext, "Reselected!", Toast.LENGTH_LONG).show();
 	}
 
 	@Override
-	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+	public void onTabSelected(Tab tab, FragmentTransaction ft) 
+	{
 		ft.replace(R.id.fragment_container, fragment);
 	}
 
 	@Override
-	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) 
+	{
 		ft.remove(fragment);
 	}
 	

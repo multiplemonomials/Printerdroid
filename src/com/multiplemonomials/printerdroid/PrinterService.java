@@ -52,44 +52,136 @@ public class PrinterService extends Service {
 	
 	private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 	
-    private Boolean waiting_for_responce;
+	//--------------------------------------------------------
+	//sending and recieving code
+	//--------------------------------------------------------
+	
+	void updateReceivedData(byte[] data)
+	{
+		String dataString;
+		try 
+		{
+			dataString = new String(data, "ASCII");
+			Log.i(TAG, "First Data Char: " + String.format("%x", data[0]));
+			consoleAdd(dataString);
+		}
+		catch (UnsupportedEncodingException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+
+	
+    //this is used to do a quick comparision on what the printer sends back
+    private final String badResponse = "rs";
     
-    private String responce;
+    private Object sendingLock = new Object();
     
-    /**
-     * Use this to ask for a response to the command you just sent.
-     * 
-     * Blocks until a line is received.
-     */
-    public synchronized String sendCommandWithResponce(String toSend)
+    private boolean waiting_for_response = false;;
+    
+    private String response;
+    
+    
+    private void addResponse(byte[] data)
     {
-    	//send a signal to the receiver thread
-    	waiting_for_responce = true;
-    	
-    	responce = new String("");
-    	send(toSend);
     	try 
     	{
-			waiting_for_responce.wait();
+			response = response + new String(data, "ASCII");
+		} 
+    	catch (UnsupportedEncodingException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-    	catch (InterruptedException e)
+    	
+    	//if we got a newline, then the current line is over
+    	if(response.endsWith("\n"))
+    	{
+    		synchronized(sendingLock)
+    		{
+        		sendingLock.notify();
+    		}
+    	}
+    }
+    
+    /**
+     * sends the string, adding a newline if it doesn't have one.
+     * 
+     * this uses a synchronized block, so only one send can be processed at a time.
+     * It will wait for a non-error responce from the printer before continuing
+     * 
+     * WARNING: this will add a newline to the source string it it doesn't end with one
+     * 
+     * @param string
+     */
+    public String send(String string)
+    {
+		try 
+    	{
+    		if(driver != null)
+    		{
+        		if(!string.endsWith("\n"))
+        		{
+        			string = string + "\n";
+        		}
+        		byte[] bytes = string.getBytes();
+        		Log.i(TAG, "Sending bytes: " + bytesToHexString(bytes));
+        		
+        		response = new String();
+        		
+            	//we need this synchronized block so that we can wait for the responce that it was received successfully ("ok\n")
+        		synchronized(sendingLock)
+        		{
+            		waiting_for_response = true;
+            		//keep looping if we get rs, which means that there was a bad transmission
+            		do
+            		{
+        				driver.write(bytes, 1000);
+        				sendingLock.wait();
+            		}
+            		while(response == badResponse);
+            		
+            		waiting_for_response = false;
+        		}
+        		
+        		Log.d(TAG, "Responce: " + response);
+        		
+        		return response;
+        		
+    		}
+    		else
+    		{
+        		Log.w(TAG, "Trying to send data over uninitialized serial connection");
+    		}
+		} 
+    	catch (IOException e) 
     	{
 			e.printStackTrace();
 		}
-    	waiting_for_responce = false;
-    	
-    	return responce;
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
     }
     
-    private void addResponce(byte[] data) throws UnsupportedEncodingException
+    public void onNewData(final byte[] data) 
     {
-    	responce = responce + new String(data, "ASCII");
-    	//if we got a newline, then the current line is over
-    	if(responce.endsWith("\n"))
+    	
+    	if(waiting_for_response)
     	{
-    		waiting_for_responce.notify();;
+    		addResponse(data);
     	}
+    	
+    	else
+    	{
+    		updateReceivedData(data);
+    	}
+    	
     }
+    
+    
 	
 	private final SerialInputOutputManager.Listener mListener = new SerialInputOutputManager.Listener() 
 	{
@@ -102,22 +194,7 @@ public class PrinterService extends Service {
         @Override
         public void onNewData(final byte[] data) 
         {
-        	if(!waiting_for_responce)
-        	{
-        		PrinterService.this.updateReceivedData(data);
-        	}
-        	//this is a bit of a jury-rig so that we can read the temperature without having to parse the entire console
-        	else
-        	{
-        		try 
-        		{
-        			addResponce(data);
-				} 
-        		catch (UnsupportedEncodingException e)
-        		{
-					e.printStackTrace();
-				}
-        	}
+        	PrinterService.this.onNewData(data);
         }
     };
     
@@ -133,25 +210,37 @@ public class PrinterService extends Service {
     	instance = this;
     	
     	Log.d(TAG, "Resumed, sDriver=" + driver);
-        if (driver == null) {
+        if (driver == null) 
+        {
             consoleAddLine("No serial device.");
-        } else {
-            try {
+        }
+        
+        else 
+        {
+            try 
+            {
                 driver.open();
                 driver.setBaudRate(Settings.baudrate);
-            } catch (IOException e) {
+            }
+            catch (IOException e) 
+            {
                 Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
                 consoleAddLine("Error opening device: " + e.getMessage());
-                try {
+                try 
+                {
                     driver.close();
-                } catch (IOException e2) {
+                }
+                catch (IOException e2)
+                {
                     // Ignore.
                 }
                 driver = null;
                 return super.onStartCommand(intent,  flags,  startId);
             }
+            
            consoleAddLine("Serial device: " + driver.getClass().getSimpleName());
         }
+        
         onDeviceStateChange();
         
         Log.i(TAG, "Printerdroid Service Started");
@@ -164,10 +253,14 @@ public class PrinterService extends Service {
     public void onDestroy()
     {
     	stopIoManager();
-        if (driver != null) {
-            try {
+        if (driver != null) 
+        {
+            try 
+            {
                 driver.close();
-            } catch (IOException e) {
+            } 
+            catch (IOException e) 
+            {
                 // Ignore.
             }
             driver = null;
@@ -210,25 +303,13 @@ public class PrinterService extends Service {
 		}
 	}
 	
-	void updateReceivedData(byte[] data)
-	{
-		String dataString;
-		try {
-			dataString = new String(data, "ASCII");
-			//dataString = data.toString();
-			Log.i(TAG, "First Data Char: " + String.format("%x", data[0]));
-			consoleAdd(dataString);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 	final protected static char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-	public static String bytesToHexString(byte[] bytes) {
+	public static String bytesToHexString(byte[] bytes) 
+	{
 	    char[] hexChars = new char[bytes.length * 2];
 	    int v;
-	    for ( int j = 0; j < bytes.length; j++ ) {
+	    for ( int j = 0; j < bytes.length; j++ ) 
+	    {
 	        v = bytes[j] & 0xFF;
 	        hexChars[j * 2] = hexArray[v >>> 4];
 	        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
@@ -255,34 +336,6 @@ public class PrinterService extends Service {
             mSerialIoManager = new SerialInputOutputManager(driver, mListener);
             mExecutor.submit(mSerialIoManager);
         }
-    }
-    
-    public void send(String string)
-    {
-
-        	try 
-        	{
-        		if(driver != null)
-        		{
-            		if(!string.endsWith("\n"))
-            		{
-            			string = string + "\n";
-            		}
-            		byte[] bytes = string.getBytes();
-            		Log.i(TAG, "Sending bytes: " + bytesToHexString(bytes));
-            		Log.i(TAG, "Dump: " + HexDump.dumpHexString(bytes));
-    				driver.write(bytes, 1000);
-        		}
-        		else
-        		{
-            		Log.w(TAG, "Trying to send data over uninitialized serial connection");
-        		}
-			} 
-        	catch (IOException e) 
-        	{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
     }
     
 	public class MyLocalBinder extends Binder {

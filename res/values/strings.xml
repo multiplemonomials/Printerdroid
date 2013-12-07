@@ -35,4 +35,5 @@
     <string name="degrees_centegrade">°C</string>
     <string name="turn_on_printer">Printer On</string>
     <string name="turn_off_printer">Printer Off</string>
+    <string name="print_status">Print Status</string>
 </resources>

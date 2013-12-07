@@ -15,7 +15,8 @@ public class BarView extends View {
 	
 	float currentWidthInPixels;
 
-	public BarView(Context context, AttributeSet attrs) {
+	public BarView(Context context, AttributeSet attrs) 
+	{
 		super(context, attrs);
 		paint = new Paint();
 		paint.setColor(Color.RED);
@@ -24,7 +25,8 @@ public class BarView extends View {
 		
 	}
 	
-	public BarView(Context context) {
+	public BarView(Context context) 
+	{
 		super(context);
 		
 		paint = new Paint();

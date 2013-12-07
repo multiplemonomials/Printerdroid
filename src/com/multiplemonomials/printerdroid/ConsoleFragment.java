@@ -2,8 +2,10 @@ package com.multiplemonomials.printerdroid;
 
 import com.multiplemonomials.printerdroid.R;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,22 +19,27 @@ public class ConsoleFragment extends Fragment implements ConsoleListener{
 
 	TextView textView;
 	
-	PrinterService myService;
-	
 	EditText editText;
 	
 	
-	  @Override
-	    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		  	View view = inflater.inflate(R.layout.console, container, false);
-	  		textView = (TextView)view.findViewById(R.id.console);
-		  	textView.setGravity(Gravity.LEFT);
-		  	editText = (EditText)view.findViewById(R.id.consoleInput);
-	        return view;
-	    }
+  @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) 
+  	{
+	  	View view = inflater.inflate(R.layout.console, container, false);
+  		textView = (TextView)view.findViewById(R.id.console);
+	  	textView.setGravity(Gravity.LEFT);
+	  	editText = (EditText)view.findViewById(R.id.consoleInput);
+	  	
+	  	if(PrinterService.instance != null)
+	  	{
+	  		textView.setText(PrinterService.instance.currentConsole);
+	  	}
+        return view;
+    }
 
 	@Override
-	public void onNewConsole() {
+	public void onNewConsole() 
+	{
 		assert(textView != null);
 		if(getActivity() != null)
 		{
@@ -49,5 +56,4 @@ public class ConsoleFragment extends Fragment implements ConsoleListener{
 		}
 		
 	}
-	
 }

@@ -2,6 +2,7 @@ package com.multiplemonomials.printerdroid;
 
 import com.multiplemonomials.printerdroid.R;
 import com.multiplemonomials.printerdroid.view.BarView;
+import com.multiplemonomials.printerdroid.view.ExpandablePanel;
 
 import android.app.Fragment;
 import android.graphics.Color;
@@ -27,17 +28,20 @@ public class OverviewFragment extends Fragment
 
 	/** Called when the activity is first created. */
 	@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) 
+	{
 		View view = inflater.inflate(R.layout.overview, container, false);
 		
 		heaterTempView = (BarView) view.findViewById(R.id.barView1);
 		heaterTempView.setColor(Color.RED);
 		heaterTempView.setMaxDegrees(Settings.target_heater_temp);
+		heaterTempView.setCurrentDegrees(Settings.current_heater_temp);
 		
 		bedTempView = (BarView) view.findViewById(R.id.barView2);
 		//set color to ORANGE!
 		bedTempView.setColor(Color.parseColor("#FFA500"));
-		bedTempView.setMaxDegrees(Settings.target_heater_temp);
+		bedTempView.setMaxDegrees(Settings.target_bed_temp);
+		bedTempView.setCurrentDegrees(Settings.current_bed_temp);
 		
 		layerProgressView = (ProgressBar) view.findViewById(R.id.progressBar1);
 		

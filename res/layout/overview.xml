@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/button1"
@@ -35,75 +36,92 @@
             android:onClick="onClickPrinterOnOff"
             android:text="@string/turn_on_printer"
             android:textSize="16sp" />
-
     </LinearLayout>
 
-    <LinearLayout
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true" />
+
+    <TextView
+        android:id="@+id/currentLayerTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/progressBar1"
+        android:layout_alignParentLeft="true"
+        android:maxHeight="50dip"
+        android:text="@string/currentlayer" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/linearLayout2"
+        android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/currentLayerTextView"
+            android:id="@+id/heaterTempTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/currentlayer" />
+            android:text="@string/heatertempindicator" />
 
-        <ProgressBar
-            android:id="@+id/progressBar1"
-            style="?android:attr/progressBarStyleHorizontal"
+        <LinearLayout
+            android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
 
+            <com.multiplemonomials.printerdroid.view.BarView
+                android:id="@+id/barView1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight=".96" />
+
+            <Button
+                android:id="@+id/heaterOnOffButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClickHeaterOnOff"
+                android:text="@string/turn_on" />
+        </LinearLayout>
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/heaterTempTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/heatertempindicator" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <com.multiplemonomials.printerdroid.view.BarView
-            android:id="@+id/barView1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.59" />
-
-        <Button
-            android:id="@+id/heaterOnOffButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClickHeaterOnOff"
-            android:text="@string/turn_on" />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/bedTempTextView"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/bedtempindicator" />
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/linearLayout3"
+        android:layout_marginTop="14dp"
+        android:orientation="vertical" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <com.multiplemonomials.printerdroid.view.BarView
-            android:id="@+id/barView2"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.59" />
-
-        <Button
-            android:id="@+id/bedOnOffButton"
+        <TextView
+            android:id="@+id/bedTempTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onClickBedOnOff"
-            android:text="@string/turn_on" />
+            android:text="@string/bedtempindicator" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.multiplemonomials.printerdroid.view.BarView
+                android:id="@+id/barView2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.96" />
+
+            <Button
+                android:id="@+id/bedOnOffButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClickBedOnOff"
+                android:text="@string/turn_on" />
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
