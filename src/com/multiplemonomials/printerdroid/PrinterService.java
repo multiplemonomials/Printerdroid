@@ -67,7 +67,7 @@ public class PrinterService extends Service {
 	
 	private Thread senderThread;
 	
-	public final static String temperatureCommandRegex = "ok [Tt]:\\d+ [Bb]:\\d+";
+	public final static String temperatureCommandRegex =  "ok [Tt]:\\d+ [Bb]:\\d+(\\r\\n)*";
 
     
 	//--------------------------------------------------------
@@ -84,8 +84,6 @@ public class PrinterService extends Service {
     	instance = this;
     	
     	retryConnection();
-        
-        onDeviceStateChange();
         
         Log.i(TAG, "Printerdroid Service Started");
         
@@ -131,6 +129,9 @@ public class PrinterService extends Service {
             
            consoleAddLine("Serial device: " + driver.getClass().getSimpleName());
         }
+        
+        
+        onDeviceStateChange();
     }
     
     @Override
@@ -290,8 +291,11 @@ public class PrinterService extends Service {
     					
     					PrinterService.this.sendImpl(string);
     					
-    					//wait for the printer to respond
-    					PrinterService.this.sendingLock.wait();
+    					synchronized(sendingLock)
+    					{
+        					//wait for the printer to respond
+        					PrinterService.this.sendingLock.wait();
+    					}
     				}
     			} 
     			catch (InterruptedException e) 
@@ -342,7 +346,8 @@ public class PrinterService extends Service {
 	{
 
         @Override
-        public void onRunError(Exception e) {
+        public void onRunError(Exception e) 
+        {
             Log.d(TAG, "Runner stopped.");
         }
         
