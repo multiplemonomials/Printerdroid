@@ -77,7 +77,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements ConsoleListener {
+public class MainActivity extends Activity implements ConsoleListener 
+{
 	private static final String TAG = "Printerdroid";
 	private static final int FILE_REQUEST_CODE = 0;
 	private static final int PREFERENCES_ACTIVITY_REQUEST_CODE = 1;
@@ -143,6 +144,7 @@ public class MainActivity extends Activity implements ConsoleListener {
         actionbar.addTab(ConsoleTab);
         actionbar.addTab(ViewTab);
         actionbar.addTab(OverviewTab);
+        
         if(isMyServiceRunning())
         {
         	Log.i(TAG, "Printer Service Running");
@@ -152,6 +154,68 @@ public class MainActivity extends Activity implements ConsoleListener {
         	Log.e(TAG, "Printer Service Not Started");
         }
     
+    }
+    
+    public void onBedTemperature(String response)
+    {
+    	if(response != null && response.endsWith("\n"))
+		{
+			try
+			{
+				int heaterTempIndex = response.indexOf("T:") + 2;
+				String intermediaryHeaterTemp = response.substring(heaterTempIndex);
+				
+				int bedTempIndex = intermediaryHeaterTemp.indexOf("B");
+				//make a new string with a new backing array
+				String bedTempString = new String(intermediaryHeaterTemp);
+				if(bedTempString.indexOf("B:") != -1)
+				{
+					bedTempString = bedTempString.substring((bedTempString.indexOf("B:") + 2));
+					//remove ending carriage return and newline 
+					bedTempString = bedTempString.substring(0, bedTempString.length() - 2);
+				}
+					
+				
+				//sometimes it seems like the second half of the temp command responce command gets cut off
+				//which is fine. because that's what we were trying to do anyway
+				String heaterTempString;
+				if(bedTempIndex != -1)
+				{
+					heaterTempString = intermediaryHeaterTemp.substring(0, bedTempIndex - 1);
+				}
+				else
+				{
+					heaterTempString = intermediaryHeaterTemp;
+				}
+				
+				Settings.current_heater_temp = Integer.parseInt(heaterTempString);
+				Settings.current_bed_temp = Integer.parseInt(bedTempString);
+				
+				//check if the overview fragment is being shown
+				if(MainActivity.this.overviewFragment.heaterTempTextView != null)
+				{
+					runOnUiThread(new Runnable()
+					{
+
+						@Override
+						public void run() {
+							MainActivity.this.overviewFragment.setHeaterTemperatureView(Settings.current_heater_temp);
+							MainActivity.this.overviewFragment.setBedTemperatureView(Settings.current_bed_temp);			
+						}
+						
+					});
+				}
+			}
+			catch(NumberFormatException error)
+			{
+				Log.e("PrinterdroidTemperatureThread", "Failed to parse temperature: " + response);
+			}
+			catch(StringIndexOutOfBoundsException error)
+			{
+				Log.e("PrinterdroidTemperatureThread", "Length of temperature responce is wrong: " + response);
+			}
+		
+		}
     }
     
     @Override
@@ -176,67 +240,7 @@ public class MainActivity extends Activity implements ConsoleListener {
     				//get responce
     				if(myService != null && myService.driver != null)
     				{
-    					String responce = MainActivity.this.myService.send("M105");
-    					
-    					if(responce != null && responce.endsWith("\n"))
-    					{
-    						
-    						try
-    						{
-        						int heaterTempIndex = responce.indexOf("T:") + 2;
-    							String intermediaryHeaterTemp = responce.substring(heaterTempIndex);
-    							
-    							int bedTempIndex = intermediaryHeaterTemp.indexOf("B");
-    							//make a new string with a new backing array
-    							String bedTempString = new String(intermediaryHeaterTemp);
-    							if(bedTempString.indexOf("B:") != -1)
-    							{
-    								bedTempString = bedTempString.substring((bedTempString.indexOf("B:") + 2));
-    								//remove ending carriage return and newline 
-    								bedTempString = bedTempString.substring(0, bedTempString.length() - 2);
-    							}
-    								
-    							
-    							//sometimes it seems like the second half of the temp command responce command gets cut off
-    							//which is fine. because that's what we were trying to do anyway
-    							String heaterTempString;
-    							if(bedTempIndex != -1)
-    							{
-    								heaterTempString = intermediaryHeaterTemp.substring(0, bedTempIndex - 1);
-    							}
-    							else
-    							{
-    								heaterTempString = intermediaryHeaterTemp;
-    							}
-    							
-    							Settings.current_heater_temp = Integer.parseInt(heaterTempString);
-    							Settings.current_bed_temp = Integer.parseInt(bedTempString);
-    							
-    							//check if the overview fragment is being shown
-    							if(MainActivity.this.overviewFragment.heaterTempTextView != null)
-    							{
-        							runOnUiThread(new Runnable()
-        							{
-
-    									@Override
-    									public void run() {
-    										MainActivity.this.overviewFragment.setHeaterTemperatureView(Settings.current_heater_temp);
-    										MainActivity.this.overviewFragment.setBedTemperatureView(Settings.current_bed_temp);			
-    									}
-        								
-        							});
-    							}
-    						}
-    						catch(NumberFormatException error)
-    						{
-    							Log.e("PrinterdroidTemperatureThread", "Failed to parse temperature: " + responce);
-    						}
-    						catch(StringIndexOutOfBoundsException error)
-    						{
-    							Log.e("PrinterdroidTemperatureThread", "Length of temperature responce is wrong: " + responce);
-    						}
-    					
-    					}
+    					MainActivity.this.myService.send("M105");
     				}
     				
     				try 
@@ -256,6 +260,7 @@ public class MainActivity extends Activity implements ConsoleListener {
         temperatureChecker.start();
    
     }
+    
     @Override
     public void onPause()
     {
@@ -309,16 +314,14 @@ public class MainActivity extends Activity implements ConsoleListener {
     
 	public void doRestart(View view)
 	{
-		Intent intent = new Intent(this, PrinterService.class);
-		stopService(intent);
-    	startService(intent);
-    	bindService(intent, myConnection, 0);
+		myService.retryConnection();
+		myService.rebootQueue();
 	}
 	
 	public void doClear(View view)
 	{
 		myService.clearConsole();
-		consoleFragment.onNewConsole();
+		consoleFragment.showConsole();
 	}
 	
 	public void doSend(View view)
@@ -326,8 +329,7 @@ public class MainActivity extends Activity implements ConsoleListener {
 		//if a driver is not connected, show an error dialog.
 		if(myService.driver != null)
 		{
-			String response = myService.send(consoleFragment.editText.getText().toString());
-			myService.consoleAdd(response);
+			myService.send(consoleFragment.editText.getText().toString());
 		}
 		else
 		{
@@ -336,9 +338,9 @@ public class MainActivity extends Activity implements ConsoleListener {
 	}
 
 	@Override
-	public void onNewConsole() {
-		consoleFragment.onNewConsole();
-		
+	public void onNewConsole() 
+	{
+		consoleFragment.showConsole();
 	}
 	
 	

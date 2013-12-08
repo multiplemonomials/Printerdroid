@@ -13,7 +13,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class ConsoleFragment extends Fragment implements ConsoleListener{
+public class ConsoleFragment extends Fragment
+{
 	
 	protected static final String TAG = "Printerdroid-Console";
 
@@ -37,8 +38,7 @@ public class ConsoleFragment extends Fragment implements ConsoleListener{
         return view;
     }
 
-	@Override
-	public void onNewConsole() 
+	public void showConsole() 
 	{
 		assert(textView != null);
 		if(getActivity() != null)
