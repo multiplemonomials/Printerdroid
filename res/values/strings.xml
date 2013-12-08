@@ -36,4 +36,6 @@
     <string name="turn_on_printer">Printer On</string>
     <string name="turn_off_printer">Printer Off</string>
     <string name="print_status">Print Status</string>
+    <string name="home">Home</string>
+    <string name="current_file_progress">"Current File Progress: "</string>
 </resources>

@@ -79,6 +79,11 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements ConsoleListener 
 {
+	
+	//--------------------------------------------------------
+	// Class Scope Variables
+	//--------------------------------------------------------
+	
 	private static final String TAG = "Printerdroid";
 	private static final int FILE_REQUEST_CODE = 0;
 	private static final int PREFERENCES_ACTIVITY_REQUEST_CODE = 1;
@@ -107,6 +112,10 @@ public class MainActivity extends Activity implements ConsoleListener
 	    }
 	    
 	   };
+	   
+	//--------------------------------------------------------
+	// Lifecycle Functions
+	//--------------------------------------------------------
 	
     /** Called when the activity is first created. */
     @Override
@@ -155,6 +164,128 @@ public class MainActivity extends Activity implements ConsoleListener
         }
     
     }
+    
+    @Override
+    public void onResume()
+    {
+    	super.onResume();
+    	
+    	temperatureChecker = new Thread()
+    	{
+    		@Override
+    		public void run()
+    		{
+    			String TAG = "PrinterdroidTempThread";
+    			
+    			Log.i(TAG, "Starting...");
+    			
+    			//loop until we're told to stop.
+    			while(!Thread.interrupted())
+    			{
+    				assert(MainActivity.this.myService != null);
+    				
+    				//get responce
+    				if(myService != null && myService.driver != null)
+    				{
+    					MainActivity.this.myService.send("M105");
+    				}
+    				
+    				try 
+    				{
+						sleep(3000);
+					}
+    				catch (InterruptedException e) 
+    				{
+						return;
+					}
+    				
+    			}
+    			
+    			Log.i(TAG, "Shutting down...");
+    		}
+    	};
+        temperatureChecker.start();
+   
+    }
+    
+    @Override
+    public void onPause()
+    {
+    	super.onPause();
+    	//signal the temperature checking thread to shutdown.
+    	temperatureChecker.interrupt();
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) 
+    {
+        super.onSaveInstanceState(outState);
+        outState.putInt("tab", getActionBar().getSelectedNavigationIndex());
+    }
+    
+    @Override
+    public void onDestroy()
+    {
+    	super.onDestroy();
+    	unbindService(myConnection);
+    	temperatureChecker.interrupt();
+    	myService = null;
+    }
+    
+	//--------------------------------------------------------
+	// Misc. GUI handlers
+	//--------------------------------------------------------
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+    
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
+		switch(item.getItemId()) 
+		{
+			case R.id.menuitem_preferences:
+				startActivityForResult(new Intent(this, PreferencesActivity.class), PREFERENCES_ACTIVITY_REQUEST_CODE);
+				return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode == FILE_REQUEST_CODE)
+		{
+			//get the file that was returned
+			//check if the user pressed cancel
+			if(data != null)
+			{
+				Uri fileUri = data.getData();
+				Settings.currentFilePath = fileUri;
+				File file = new File(fileUri.getPath());
+				Log.v(TAG, "Loaded file " + file.getPath());
+				Log.v(TAG, "File exists: " + file.exists());
+				
+				//read its data
+				Settings.currentFile = loadFile(file);
+				Log.i(TAG, "current file has " + Settings.currentFile.size() + " layers");
+			}
+
+		}
+		else if(requestCode == PREFERENCES_ACTIVITY_REQUEST_CODE)
+		{
+			Settings.regenerate(this);
+		}
+	}
+    
+	//--------------------------------------------------------
+	// Temperature Thread
+	//--------------------------------------------------------
     
     public void onBedTemperature(String response)
     {
@@ -218,99 +349,27 @@ public class MainActivity extends Activity implements ConsoleListener
 		}
     }
     
-    @Override
-    public void onResume()
+	//--------------------------------------------------------
+	// Service stuff
+	//--------------------------------------------------------
+    
+    private boolean isMyServiceRunning() 
     {
-    	super.onResume();
-    	
-    	temperatureChecker = new Thread()
-    	{
-    		@Override
-    		public void run()
-    		{
-    			String TAG = "PrinterdroidTempThread";
-    			
-    			Log.i(TAG, "Starting...");
-    			
-    			//loop until we're told to stop.
-    			while(!Thread.interrupted())
-    			{
-    				assert(MainActivity.this.myService != null);
-    				
-    				//get responce
-    				if(myService != null && myService.driver != null)
-    				{
-    					MainActivity.this.myService.send("M105");
-    				}
-    				
-    				try 
-    				{
-						sleep(3000);
-					}
-    				catch (InterruptedException e) 
-    				{
-						return;
-					}
-    				
-    			}
-    			
-    			Log.i(TAG, "Shutting down...");
-    		}
-    	};
-        temperatureChecker.start();
-   
-    }
-    
-    @Override
-    public void onPause()
-    {
-    	super.onPause();
-    	//signal the temperature checking thread to shutdown.
-    	temperatureChecker.interrupt();
-    }
-    
-    @Override
-    public void onDestroy()
-    {
-    	super.onDestroy();
-    	unbindService(myConnection);
-    	temperatureChecker.interrupt();
-    	myService = null;
-    }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
-    }
-    
-    private boolean isMyServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (PrinterService.class.getName().equals(service.service.getClassName())) {
+        
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) 
+        {
+            if (PrinterService.class.getName().equals(service.service.getClassName())) 
+            {
                 return true;
             }
         }
         return false;
     }
-
     
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
-			case R.id.menuitem_preferences:
-				startActivityForResult(new Intent(this, PreferencesActivity.class), PREFERENCES_ACTIVITY_REQUEST_CODE);
-				return true;
-		}
-		return false;
-	}
-	
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("tab", getActionBar().getSelectedNavigationIndex());
-    }
+	//--------------------------------------------------------
+	// Button Handlers
+	//--------------------------------------------------------
     
 	public void doRestart(View view)
 	{
@@ -336,13 +395,6 @@ public class MainActivity extends Activity implements ConsoleListener
 			ErrorDialog.showErrorDialog(this, R.string.app_name, "No device connected.");
 		}
 	}
-
-	@Override
-	public void onNewConsole() 
-	{
-		consoleFragment.showConsole();
-	}
-	
 	
 	public void onClickLoadFile(View view)
 	{
@@ -350,119 +402,6 @@ public class MainActivity extends Activity implements ConsoleListener
 		 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 		    intent.setType("file/*");
 		    startActivityForResult(intent, FILE_REQUEST_CODE);
-	}
-	
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		if(requestCode == FILE_REQUEST_CODE)
-		{
-			//get the file that was returned
-			//check if the user pressed cancel
-			if(data != null)
-			{
-				Uri fileUri = data.getData();
-				Settings.currentFilePath = fileUri;
-				File file = new File(fileUri.getPath());
-				Log.v(TAG, "Loaded file " + file.getPath());
-				Log.v(TAG, "File exists: " + file.exists());
-				
-				//read its data
-				Settings.currentFile = loadFile(file);
-				Log.i(TAG, "current file has " + Settings.currentFile.size() + " layers");
-			}
-
-		}
-		else if(requestCode == PREFERENCES_ACTIVITY_REQUEST_CODE)
-		{
-			Settings.regenerate(this);
-		}
-	}
-
-	public List<Layer> loadFile(File file) 
-	{
-		try 
-		{
-			//setup file stream
-			InputStream inputStream = new FileInputStream(file);
-			LineReader lineReader = new LineReader(inputStream);
-			
-			//run parser
-			ParserAsyncTask parserAsyncTask = new ParserAsyncTask(new ProgressBoxManager(this));
-			parserAsyncTask.execute(lineReader);
-			List<Layer> codes = (List<Layer>)parserAsyncTask.get();
-			return codes;
-		}
-		catch (FileNotFoundException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-		} 
-		catch (ExecutionException e) 
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public void onClickPrint(View view)
-	{
-		Button button = (Button) view;
-		
-		//if we're currently printing, the button turns to cancel
-		if(!Settings.isPrinting)
-		{
-			if(Settings.currentFile != null)
-			{
-				try 
-				{
-					myService.print(Settings.currentFilePath, this);
-				} 
-				catch (FileNotFoundException e) 
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				button.setText(getResources().getString(android.R.string.cancel));
-			}
-			else
-			{
-				Toast.makeText(this, "No File Loaded", Toast.LENGTH_SHORT).show();
-			}
-		}
-		else
-		{
-			myService.cancelPrint();
-			button.setText(getResources().getString(R.string.print));
-		}
-	}
-
-	//called by PrintAsyncTask when it wants us to show the progress bar
-	public void showLayerProgressBar() 
-	{
-		//at some point I would like to have some sort of transition that pops out the progress bar
-	}
-
-	/**Called by PrintAsyncTask every time it finishes printing a layer.
-	 * Changes the value of OverviewFragment's progress bar
-	 * 
-	 * @param progress a pair holding the current layer and the current line, respectively
-	 */
-	public void updateLayerProgressBar(Pair<Integer, Integer> progress) 
-	{
-		assert(overviewFragment.layerProgressView != null);
-		overviewFragment.layerProgressView.setMax(Settings.currentFile.size());
-		overviewFragment.layerProgressView.setProgress(progress._first);
-		overviewFragment.layerTextView.setText(getResources().getString(R.string.currentlayer) + progress._first);
-	}
-
-	public void closeLayerProgressBar() 
-	{
-		//at some point I would like to have some sort of transition that hides the progress bar
-		
 	}
 	
 	/**
@@ -528,6 +467,112 @@ public class MainActivity extends Activity implements ConsoleListener
 			myService.send("M140 S " + Settings.target_bed_temp);
 			Settings.current_bed_state_on = true;
 		}
+	}
+	
+	public void onClickHome(View view)
+	{
+		myService.send("G28");
+	}
+	
+	public void onClickPrint(View view)
+	{
+		Button button = (Button) view;
+		
+		//if we're currently printing, the button turns to cancel
+		if(!Settings.isPrinting)
+		{
+			if(Settings.currentFile != null)
+			{
+				try 
+				{
+					myService.print(Settings.currentFilePath, this);
+				} 
+				catch (FileNotFoundException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				button.setText(getResources().getString(android.R.string.cancel));
+			}
+			else
+			{
+				Toast.makeText(this, "No File Loaded", Toast.LENGTH_SHORT).show();
+			}
+		}
+		else
+		{
+			myService.cancelPrint();
+			button.setText(getResources().getString(R.string.print));
+		}
+	}
+	
+	//--------------------------------------------------------
+	// Service console handling
+	//--------------------------------------------------------
+
+	@Override
+	public void onNewConsole() 
+	{
+		consoleFragment.showConsole();
+	}
+
+	public List<Layer> loadFile(File file) 
+	{
+		try 
+		{
+			//setup file stream
+			InputStream inputStream = new FileInputStream(file);
+			LineReader lineReader = new LineReader(inputStream);
+			
+			//run parser
+			ParserAsyncTask parserAsyncTask = new ParserAsyncTask(new ProgressBoxManager(this));
+			parserAsyncTask.execute(lineReader);
+			List<Layer> codes = (List<Layer>)parserAsyncTask.get();
+			return codes;
+		}
+		catch (FileNotFoundException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (InterruptedException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (ExecutionException e) 
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	//--------------------------------------------------------
+	// Printing Code
+	//--------------------------------------------------------
+
+	//called by PrintAsyncTask when it wants us to show the progress bar
+	public void showLayerProgressBar() 
+	{
+		//at some point I would like to have some sort of transition that pops out the progress bar
+	}
+
+	/**Called by PrintAsyncTask every time it finishes printing a layer.
+	 * Changes the value of OverviewFragment's progress bar
+	 * 
+	 * @param progress a pair holding the current layer and the current line, respectively
+	 */
+	public void updateLayerProgressBar(Pair<Integer, Integer> progress) 
+	{
+		assert(overviewFragment.layerProgressView != null);
+		overviewFragment.layerProgressView.setMax(Settings.currentFile.size());
+		overviewFragment.layerProgressView.setProgress(progress._first);
+		overviewFragment.layerTextView.setText(getResources().getString(R.string.currentlayer) + progress._first);
+	}
+
+	public void closeLayerProgressBar() 
+	{
+		//at some point I would like to have some sort of transition that hides the progress bar
+		
 	}
 
 	    
