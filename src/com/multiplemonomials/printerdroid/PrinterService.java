@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,7 +55,7 @@ public class PrinterService extends Service {
 	
 	private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 	
-	private BlockingDeque<String> sendingQueue;
+	public BlockingDeque<String> sendingQueue;
     
     ConsoleListener consoleListener;
     
@@ -68,6 +70,8 @@ public class PrinterService extends Service {
 	private Thread senderThread;
 	
 	public final static String temperatureCommandRegex =  "ok [Tt]:\\d+ [Bb]:\\d+(\\r\\n)*";
+	
+	public boolean isPrinting = false;
 
     
 	//--------------------------------------------------------
@@ -315,16 +319,28 @@ public class PrinterService extends Service {
     	{
     		if(driver != null)
     		{
-        		if(!string.endsWith("\n"))
+        		if(!string.endsWith("\r\n"))
         		{
-        			string = string + "\n";
+        			string = string + "\r\n";
         		}
         		
-        		byte[] bytes = string.getBytes();
-        		Log.i(TAG, "Sending bytes: " + bytesToHexString(bytes));
+        		//divide string into 8-char parts so that we don't jam up the connection
+        		List<String> strings = new ArrayList<String>();
+        		int index = 0;
+        		while (index < string.length())
+        		{
+        		    strings.add(string.substring(index, Math.min(index + 8, string.length())));
+        		    index += 8;
+        		}
         		
-
-				driver.write(bytes, 1000);
+        		for(String substring : strings)
+        		{
+        			consoleAdd(substring);
+        			
+            		byte[] bytes = substring.getBytes();
+            		
+    				driver.write(bytes, 1000);
+        		}
         		
     		}
     		else
@@ -459,6 +475,7 @@ public class PrinterService extends Service {
 		File file = new File(currentFilePath.getPath());
 		InputStream inputStream = new FileInputStream(file);
 		LineReader lineReader = new LineReader(inputStream);
+		
 		PrintAsyncTask printAsyncTask = new PrintAsyncTask(mainActivity);
 		printAsyncTask.execute(lineReader);
 	}
@@ -468,6 +485,7 @@ public class PrinterService extends Service {
 		if(printAsyncTask != null)
 		{
 			printAsyncTask.cancel(false);
+			isPrinting = false;
 		}
 	}
 

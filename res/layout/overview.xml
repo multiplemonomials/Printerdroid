@@ -11,7 +11,7 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/button1"
+            android:id="@+id/printButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
             android:textSize="16sp" />
 
         <Button
-            android:id="@+id/button4"
+            android:id="@+id/printerOnOffButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onClickPrinterOnOff"
+            android:onClick="onClickHome"
             android:text="@string/home"
             android:textSize="16sp" />
 

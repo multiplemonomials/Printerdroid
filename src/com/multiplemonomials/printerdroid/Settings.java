@@ -39,8 +39,6 @@ public class Settings {
 
 	public static int current_bed_temp = 0;
 	
-	public static boolean isPrinting = false;
-	
 	public static boolean printerIsOn = false;
 
 	public static void regenerate(Context context) 

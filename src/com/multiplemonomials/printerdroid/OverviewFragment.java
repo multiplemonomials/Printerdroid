@@ -2,8 +2,6 @@ package com.multiplemonomials.printerdroid;
 
 import com.multiplemonomials.printerdroid.R;
 import com.multiplemonomials.printerdroid.view.BarView;
-import com.multiplemonomials.printerdroid.view.ExpandablePanel;
-
 import android.app.Fragment;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -25,6 +23,11 @@ public class OverviewFragment extends Fragment
 	public TextView layerTextView;
 	public TextView heaterTempTextView;
 	public TextView bedTempTextView;
+	
+	Button heaterOnOffButton;
+	Button bedOnOffButton;
+	Button printButton;
+	Button printerOnOffButton;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -49,12 +52,35 @@ public class OverviewFragment extends Fragment
 		heaterTempTextView = (TextView) view.findViewById(R.id.heaterTempTextView);
 		bedTempTextView = (TextView) view.findViewById(R.id.bedTempTextView);
 		
-		Button heaterOnOff = (Button) view.findViewById(R.id.heaterOnOffButton);
-		Button bedOnOff = (Button) view.findViewById(R.id.bedOnOffButton);
+		heaterOnOffButton = (Button) view.findViewById(R.id.heaterOnOffButton);
+		bedOnOffButton = (Button) view.findViewById(R.id.bedOnOffButton);
+		printButton = (Button) view.findViewById(R.id.printButton);
+		printerOnOffButton = (Button) view.findViewById(R.id.printerOnOffButton);
 		
-		heaterOnOff.setText(getResources().getString(R.string.turn_on) + Settings.target_heater_temp + getResources().getString(R.string.degrees_centegrade));
-		bedOnOff.setText(getResources().getString(R.string.turn_on) + Settings.target_bed_temp + getResources().getString(R.string.degrees_centegrade));
+		//restore button state
+		if(Settings.current_heater_state_on)
+		{
+			heaterOnOffButton.setText(getResources().getString(R.string.turn_off) + "0" + getResources().getString(R.string.degrees_centegrade));
+		}
+		else
+		{
+			heaterOnOffButton.setText(getResources().getString(R.string.turn_on) + Settings.target_heater_temp + getResources().getString(R.string.degrees_centegrade));
+
+		}
 		
+		if(Settings.current_bed_state_on)
+		{
+			bedOnOffButton.setText(getResources().getString(R.string.turn_off) + "0" + getResources().getString(R.string.degrees_centegrade));
+		}
+		else
+		{
+			bedOnOffButton.setText(getResources().getString(R.string.turn_on) + Settings.target_bed_temp + getResources().getString(R.string.degrees_centegrade));
+		}
+		
+		if(((MainActivity)getActivity()).myService.isPrinting)
+		{
+			printButton.setText(android.R.string.cancel);
+		}
 		
 		return view;
 	}
@@ -80,6 +106,7 @@ public class OverviewFragment extends Fragment
 			bedTempTextView.setText(bedTempReadout);
 		}
 	}
+
 	
 
 }

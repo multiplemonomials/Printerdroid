@@ -60,16 +60,19 @@ import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -97,6 +100,8 @@ public class MainActivity extends Activity implements ConsoleListener
 	
 	Thread temperatureChecker; 
 	
+	Intent printerServiceIntent;
+	
 	protected ServiceConnection myConnection = new ServiceConnection() {
 
 	    public void onServiceConnected(ComponentName className,
@@ -119,7 +124,8 @@ public class MainActivity extends Activity implements ConsoleListener
 	
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         appContext = getApplicationContext();
@@ -127,12 +133,12 @@ public class MainActivity extends Activity implements ConsoleListener
         Settings.regenerate(this);
         
         //start service
-        Intent intent = new Intent(this, PrinterService.class);
+        printerServiceIntent = new Intent(this, PrinterService.class);
 	  	if(!isMyServiceRunning())
 	  	{
-	  		startService(intent);  
+	  		startService(printerServiceIntent);  
 	  	}
-	  	bindService(intent, myConnection, 0);
+	  	bindService(printerServiceIntent, myConnection, 0);
 
        //ActionBar
         ActionBar actionbar = getActionBar();
@@ -282,6 +288,51 @@ public class MainActivity extends Activity implements ConsoleListener
 			Settings.regenerate(this);
 		}
 	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    //Handle the back button
+	    if((keyCode == KeyEvent.KEYCODE_BACK) && (myService.isPrinting)) 
+	    {
+	    	if((myService.isPrinting))
+	    	{
+		        //Ask the user if they want to quit
+		        new AlertDialog.Builder(this)
+		        .setIcon(android.R.drawable.ic_dialog_alert)
+		        .setTitle("Quit?")
+		        .setMessage("Close the app and cancel print?")
+		        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+
+		            @Override
+		            public void onClick(DialogInterface dialog, int which) {
+
+		                //Stop the activity
+		            	MainActivity.this.myService.cancelPrint();
+		            	MainActivity.this.myService.stopService(MainActivity.this.printerServiceIntent);
+		                MainActivity.this.finish();    
+		            }
+
+		        })
+		        .setNegativeButton(android.R.string.ok, null)
+		        .show();
+
+		        return true;
+	    	}
+	    	else
+	    	{
+	    		stopService(printerServiceIntent);
+	    		finish();
+	    		return true;
+	    	}
+
+	    }
+	    
+	    else 
+	    {
+	        return super.onKeyDown(keyCode, event);
+	    }
+
+	}
     
 	//--------------------------------------------------------
 	// Temperature Thread
@@ -373,8 +424,15 @@ public class MainActivity extends Activity implements ConsoleListener
     
 	public void doRestart(View view)
 	{
-		myService.retryConnection();
-		myService.rebootQueue();
+		if(myService == null)
+		{
+			Toast.makeText(this, "Service not running or crashed, restarting", Toast.LENGTH_LONG).show();
+		}
+		else
+		{
+			myService.retryConnection();
+			myService.rebootQueue();
+		}
 	}
 	
 	public void doClear(View view)
@@ -479,7 +537,7 @@ public class MainActivity extends Activity implements ConsoleListener
 		Button button = (Button) view;
 		
 		//if we're currently printing, the button turns to cancel
-		if(!Settings.isPrinting)
+		if(!myService.isPrinting)
 		{
 			if(Settings.currentFile != null)
 			{
@@ -604,7 +662,7 @@ class MyTabsListener implements ActionBar.TabListener
 	@Override
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) 
 	{
-		ft.remove(fragment);
+		ft.hide(fragment);
 	}
 	
 

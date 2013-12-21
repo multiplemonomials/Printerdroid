@@ -2,10 +2,8 @@ package com.multiplemonomials.printerdroid;
 
 import com.multiplemonomials.printerdroid.R;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;

@@ -1,14 +1,11 @@
 package com.multiplemonomials.printerdroid;
 
 import java.io.IOException;
-import java.util.List;
-
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.multiplemonomials.androidutils.LineReader;
 import com.multiplemonomials.androidutils.Pair;
-import com.multiplemonomials.androidutils.progressbox.ProgressBoxManager;
-import com.multiplemonomials.printerdroid.gcodeparser.Layer;
 /**
  * Does the actual print, taking a LineReader initalized to the file to print
  * @author Jamie
@@ -17,6 +14,7 @@ import com.multiplemonomials.printerdroid.gcodeparser.Layer;
 public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>, Boolean>
 {
 	
+	private static final String TAG = "PrintAsyncTask";
 	private MainActivity _mainActivity;
 
 	public PrintAsyncTask(MainActivity mainActivity) 
@@ -25,6 +23,7 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 	} 
 	
 	int layer = 1;
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Boolean doInBackground(LineReader... params) 
 	{
@@ -38,9 +37,22 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 			try 
 			{
 				String line = params[0].readNextLine();
-				if(line != null)
+				if(line != null && line.matches("(\\s*);(.*)")) //make sure it's not an EOF or a comment
 				{
-					_mainActivity.myService.send(params[0].readNextLine());
+					while(PrinterService.instance.sendingQueue.size() >= 10)
+					{
+						//keep waiting until there's space in the print queue
+						Thread.sleep(250);
+					}
+					
+					Log.d(TAG, "Queing line " + line);
+					
+					if(_mainActivity == null || _mainActivity.myService == null)
+					{
+						return false;
+					}
+					
+					_mainActivity.myService.send(line);
 					
 					//are we starting a new layer?
 					if(line.contains("Z") && line.contains("G1"))
@@ -55,7 +67,13 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 				}
 				
 			} 
+			
 			catch (IOException e) 
+			{
+				e.printStackTrace();
+			} 
+			
+			catch (InterruptedException e)
 			{
 				e.printStackTrace();
 			}
@@ -66,7 +84,7 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 	@Override
 	protected void onPreExecute()
 	{
-		Settings.isPrinting = true;
+		_mainActivity.myService.isPrinting = true;
 		_mainActivity.showLayerProgressBar();
 	}
 	
@@ -78,7 +96,7 @@ public class PrintAsyncTask extends AsyncTask<LineReader, Pair<Integer, Integer>
 	@Override
 	protected void onPostExecute(Boolean result)
 	{
-		Settings.isPrinting = false;
+		_mainActivity.myService.isPrinting = false;
 		_mainActivity.closeLayerProgressBar();
 	}
 
